@@ -689,6 +689,41 @@
             .brand-title { font-size: 19px; }
             .stat-val { font-size: 19px; }
         }
+
+ /* Rechner: Kopfbereich bleibt stehen, nur die Flaschen scrollen */
+        @media (min-width: 900px) and (pointer: fine) {
+            html, body {
+                height: 100%;
+                overflow: hidden;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            header {
+                flex: 0 0 auto;
+            }
+            main {
+                flex: 1 1 auto;
+                min-height: 0;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                padding-bottom: 0;
+            }
+            main > * {
+                flex: 0 0 auto;
+            }
+            #gridView {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+                align-content: start;
+                padding: 0 6px 32px 0;
+                scrollbar-width: thin;
+                scrollbar-color: var(--gold-600) transparent;
+            }
+        }
     </style>
 </head>
 <body>
