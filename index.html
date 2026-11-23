@@ -1469,7 +1469,7 @@
             try {
                 var file = new File([jsonStr], fileName, { type: 'application/json' });
                 if (navigator.canShare({ files: [file] })) {
-                    navigator.share({ files: [file], title: fileName }).then(done).catch(function(err) {
+                    navigator.share({ files: [file] }).then(done).catch(function(err) {
                         if (err && err.name !== 'AbortError') { downloadBlob(jsonStr, fileName); done(); }
                     });
                     return;
