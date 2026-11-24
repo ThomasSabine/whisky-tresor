@@ -206,7 +206,7 @@
             position: absolute;
             right: 0;
             top: calc(100% + 8px);
-            width: 260px;
+            width: 280px;
             max-width: calc(100vw - 32px);
             background-color: var(--surface);
             border: 1px solid var(--border);
@@ -278,6 +278,33 @@
             background: var(--gold-500);
             color: #14110e;
             border-color: var(--gold-500);
+        }
+
+        .pill-btn.sm {
+            padding: 4px 9px;
+            min-height: 30px;
+            font-size: 11px;
+        }
+
+        .stat-rate {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.35;
+        }
+
+        .stat-rate.warn { color: var(--danger); }
+
+        /* Preis + Kaufwährung nebeneinander */
+        .price-input-wrap { display: flex; gap: 6px; }
+        .price-input-wrap .input-control { flex: 1 1 auto; min-width: 0; }
+        .price-input-wrap .select-control { flex: 0 0 92px; width: 92px; }
+
+        .orig-price {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
         }
 
         /* Main */
@@ -1006,13 +1033,10 @@
                 <button type="button" class="dropdown-item" onclick="closeMenu(); pickBackground()">🖼️ Hintergrundbild wählen</button>
                 <button type="button" class="dropdown-item" onclick="closeMenu(); resetBackground()">↩️ Hintergrund zurücksetzen</button>
                 <div class="dropdown-divider"></div>
-                <div class="currency-row">
-                    <span>Währung:</span>
-                    <div class="currency-pills">
-                        <button type="button" id="pillEur" class="pill-btn active" onclick="setCurrency('EUR')">EUR</button>
-                        <button type="button" id="pillChf" class="pill-btn" onclick="setCurrency('CHF')">CHF</button>
-                    </div>
-                </div>
+                <div class="currency-row" id="rateInfo">Wechselkurs wird geladen …</div>
+                <button type="button" class="dropdown-item" onclick="closeMenu(); refreshRate(true)">🔄 Kurs aus dem Netz aktualisieren</button>
+                <button type="button" class="dropdown-item" onclick="closeMenu(); setManualRate()">✏️ Kurs manuell festlegen</button>
+                <button type="button" class="dropdown-item" onclick="closeMenu(); assignLegacyCurrency()">🏷️ Kaufwährung für alte Einträge</button>
             </div>
         </div>
     </div>
@@ -1034,9 +1058,16 @@
             <div class="stat-sub" id="statCountSub">–</div>
         </div>
         <div class="stat-card">
-            <div class="stat-header"><span>Kaufwert im Schrank</span><span>💰</span></div>
+            <div class="stat-header">
+                <span>Kaufwert im Schrank</span>
+                <div class="currency-pills" role="group" aria-label="Anzeigewährung">
+                    <button type="button" id="pillChf" class="pill-btn sm" onclick="setCurrency('CHF')">CHF</button>
+                    <button type="button" id="pillEur" class="pill-btn sm active" onclick="setCurrency('EUR')">EUR</button>
+                </div>
+            </div>
             <div class="stat-val text-gold" id="statValue">0,00 €</div>
             <div class="stat-sub" id="statValueSub">–</div>
+            <div class="stat-rate" id="statRate"></div>
         </div>
         <div class="stat-card clickable" onclick="setView('archive')">
             <div class="stat-header"><span>Archiv (leer)</span><span>📦</span></div>
@@ -1177,15 +1208,21 @@
             </div>
 
             <div class="form-row form-row-3">
-                <div class="form-group">
-                    <label class="form-label" id="priceLabel" for="fieldPrice">Preis (EUR)</label>
-                    <input type="text" inputmode="decimal" id="fieldPrice" class="input-control" placeholder="44.90">
+                <div class="form-group span-full">
+                    <label class="form-label" for="fieldPrice">Preis &amp; Kaufwährung</label>
+                    <div class="price-input-wrap">
+                        <input type="text" inputmode="decimal" id="fieldPrice" class="input-control" placeholder="44.90">
+                        <select id="fieldPriceCurrency" class="select-control" aria-label="Kaufwährung">
+                            <option value="CHF">CHF</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="fieldRating">Bewertung (1–5)</label>
                     <input type="text" inputmode="decimal" id="fieldRating" class="input-control" value="4.8">
                 </div>
-                <div class="form-group span-full">
+                <div class="form-group">
                     <label class="form-label" for="fieldFillLevel">Füllstand (<span id="fillLevelVal">100</span>%)</label>
                     <input type="range" min="0" max="100" step="5" id="fieldFillLevel" value="100" oninput="document.getElementById('fillLevelVal').textContent = this.value">
                 </div>
@@ -1336,8 +1373,14 @@
         <p class="hint" id="rebuyInfo" style="margin:0 0 14px; font-size:13px;"></p>
         <div class="form-row form-row-2">
             <div class="form-group">
-                <label class="form-label" id="rebuyPriceLabel" for="rebuyPrice">Preis</label>
-                <input type="text" inputmode="decimal" id="rebuyPrice" class="input-control">
+                <label class="form-label" for="rebuyPrice">Preis &amp; Kaufwährung</label>
+                <div class="price-input-wrap">
+                    <input type="text" inputmode="decimal" id="rebuyPrice" class="input-control">
+                    <select id="rebuyCurrency" class="select-control" aria-label="Kaufwährung">
+                        <option value="CHF">CHF</option>
+                        <option value="EUR">EUR</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="rebuyDate">Kaufdatum</label>
@@ -1390,8 +1433,34 @@
     var hasFSA = typeof window.showOpenFilePicker === 'function';
 
     var whiskeys = [];
-    var currency = 'EUR';
+    var currency = 'EUR';          // Anzeigewährung für den ganzen Tresor
     var currentImageBase64 = '';
+
+    /* ---------- Währungen & Wechselkurs ----------
+       Jeder Kauf speichert seinen Preis in der Kaufwährung (priceCurrency bzw.
+       currency in Verlauf/Vorrat). Für die Anzeige wird mit dem EUR→CHF-Kurs
+       umgerechnet. Einträge ohne Währung (aus früheren Versionen) gelten als
+       EUR, weil die App bisher EUR als Standard hatte. */
+    var LEGACY_CURRENCY = 'EUR';
+    var RATE_KEY = 'kowi_tresor_rate';
+    var RATE_MAX_AGE_MS = 6 * 60 * 60 * 1000;   // höchstens alle 6 Stunden neu laden
+    var rate = null; // { value: CHF pro 1 EUR, date, source, fetchedAt, manual }
+    var rateLoading = false;
+
+    function parseFrankfurter(j) {
+        if (!j || !j.rates || !(j.rates.CHF > 0)) return null;
+        return { value: j.rates.CHF, date: j.date || '' };
+    }
+
+    var RATE_SOURCES = [
+        { url: 'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=CHF', name: 'EZB via Frankfurter', parse: parseFrankfurter },
+        { url: 'https://api.frankfurter.app/latest?from=EUR&to=CHF', name: 'EZB via Frankfurter', parse: parseFrankfurter },
+        { url: 'https://open.er-api.com/v6/latest/EUR', name: 'ExchangeRate-API', parse: function(j) {
+            if (!j || !j.rates || !(j.rates.CHF > 0)) return null;
+            var d = j.time_last_update_unix ? new Date(j.time_last_update_unix * 1000) : new Date();
+            return { value: j.rates.CHF, date: d.toISOString().slice(0, 10) };
+        } }
+    ];
 
     var fileHandle = null;      // FileSystemFileHandle (nur Rechner)
     var fileReady = false;      // Schreibrecht vorhanden
@@ -1474,6 +1543,10 @@
         if (it.reserve !== undefined && !Array.isArray(it.reserve)) delete it.reserve;
         if (Array.isArray(it.reserve) && !it.reserve.length) delete it.reserve;
         if (it.wishlist !== undefined) it.wishlist = !!it.wishlist;
+        if (it.priceCurrency !== undefined) {
+            var pc = normCur(it.priceCurrency);
+            if (pc) it.priceCurrency = pc; else delete it.priceCurrency;
+        }
         return it;
     }
 
@@ -1662,7 +1735,10 @@
     }
 
     document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') checkForExternalUpdate();
+        if (document.visibilityState === 'visible') {
+            checkForExternalUpdate();
+            refreshRate(false);
+        }
     });
     window.addEventListener('focus', checkForExternalUpdate);
 
@@ -1954,8 +2030,12 @@
     /* ---------- Start ---------- */
     function initApp() {
         var savedCurrency = lsGet('kowi_tresor_currency');
-        if (savedCurrency) currency = savedCurrency;
+        if (savedCurrency === 'EUR' || savedCurrency === 'CHF') currency = savedCurrency;
         updateCurrencyUI();
+
+        loadRate();
+        updateRateUI();
+        refreshRate(false);
 
         if (hasFSA) {
             Array.prototype.forEach.call(document.querySelectorAll('.fsa-only'), function(el) { el.classList.remove('hidden'); });
@@ -2005,13 +2085,168 @@
         updateCurrencyUI();
         lsSet('kowi_tresor_currency', currency);
         renderApp();
+        if (!hasRate() && whiskeys.some(function(w) { return itemCur(w) !== currency && (parseNum(w.price) || 0) > 0; })) {
+            showToast('⚠️ Kein Wechselkurs – Preise in anderer Währung werden nicht umgerechnet', 4000);
+        }
     }
 
     function updateCurrencyUI() {
-        document.getElementById('pillEur').className = 'pill-btn' + (currency === 'EUR' ? ' active' : '');
-        document.getElementById('pillChf').className = 'pill-btn' + (currency === 'CHF' ? ' active' : '');
-        document.getElementById('priceLabel').textContent = 'Preis (' + currency + ')';
-        document.getElementById('rebuyPriceLabel').textContent = 'Preis (' + currency + ')';
+        document.getElementById('pillEur').className = 'pill-btn sm' + (currency === 'EUR' ? ' active' : '');
+        document.getElementById('pillChf').className = 'pill-btn sm' + (currency === 'CHF' ? ' active' : '');
+    }
+
+    /* ---------- Wechselkurs laden / umrechnen ---------- */
+    function normCur(c) {
+        var t = String(c === undefined || c === null ? '' : c).trim().toUpperCase();
+        if (t === '€') t = 'EUR';
+        return (t === 'EUR' || t === 'CHF') ? t : '';
+    }
+
+    function loadRate() {
+        try { rate = JSON.parse(lsGet(RATE_KEY) || 'null'); } catch (e) { rate = null; }
+        if (rate && !(rate.value > 0)) rate = null;
+    }
+
+    function saveRate() { lsSet(RATE_KEY, JSON.stringify(rate)); }
+    function hasRate() { return !!(rate && rate.value > 0); }
+    function fmtRate(v) { return Number(v).toFixed(4); }
+
+    function fetchJson(url) {
+        var ctrl = window.AbortController ? new AbortController() : null;
+        var timer = setTimeout(function() { if (ctrl) ctrl.abort(); }, 8000);
+        return fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined }).then(function(r) {
+            clearTimeout(timer);
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }, function(err) { clearTimeout(timer); throw err; });
+    }
+
+    function refreshRate(force) {
+        if (rateLoading) return Promise.resolve();
+        if (!force && rate && rate.manual) return Promise.resolve();
+        if (!force && rate && rate.fetchedAt && (Date.now() - rate.fetchedAt) < RATE_MAX_AGE_MS) return Promise.resolve();
+        if (!window.fetch) { updateRateUI(); return Promise.resolve(); }
+
+        rateLoading = true;
+        var i = 0;
+        function next() {
+            if (i >= RATE_SOURCES.length) return Promise.reject(new Error('Kein Kurs verfügbar'));
+            var src = RATE_SOURCES[i++];
+            return fetchJson(src.url).then(function(j) {
+                var r = src.parse(j);
+                if (!r || !(r.value > 0)) throw new Error('Ungültige Antwort');
+                r.source = src.name;
+                return r;
+            }).catch(function() { return next(); });
+        }
+
+        return next().then(function(r) {
+            rate = { value: r.value, date: r.date || todayISO(), source: r.source, fetchedAt: Date.now(), manual: false };
+            saveRate();
+            rateLoading = false;
+            updateRateUI();
+            renderApp();
+            if (force) showToast('Kurs aktualisiert: 1 EUR = ' + fmtRate(rate.value) + ' CHF', 3000);
+        }).catch(function() {
+            rateLoading = false;
+            updateRateUI();
+            renderApp();
+            if (force) showToast('⚠️ Kurs konnte nicht geladen werden' + (hasRate() ? ' – der letzte Kurs bleibt aktiv' : ''), 4000);
+        });
+    }
+
+    function setManualRate() {
+        var cur = hasRate() ? fmtRate(rate.value) : '';
+        var input = prompt('Wechselkurs manuell festlegen:\n\n1 EUR = ? CHF\n\n(„Kurs aus dem Netz aktualisieren“ schaltet wieder auf den automatischen Kurs um.)', cur);
+        if (input === null) return;
+        var v = parseNum(input);
+        if (isNaN(v) || v <= 0) { alert('Bitte eine gültige Zahl eingeben, z. B. 0.94'); return; }
+        rate = { value: v, date: todayISO(), source: 'manuell', fetchedAt: Date.now(), manual: true };
+        saveRate();
+        updateRateUI();
+        renderApp();
+        showToast('Manueller Kurs: 1 EUR = ' + fmtRate(v) + ' CHF');
+    }
+
+    function rateText() {
+        if (!hasRate()) return rateLoading ? 'Wechselkurs wird geladen …' : 'Kein Wechselkurs verfügbar';
+        return '1 EUR = ' + fmtRate(rate.value) + ' CHF · ' +
+            (rate.manual ? 'manuell' : (rate.source + ', ' + formatDateDE(rate.date)));
+    }
+
+    function updateRateUI() {
+        var el = document.getElementById('rateInfo');
+        if (el) el.textContent = '💱 ' + rateText();
+    }
+
+    function itemCur(item) {
+        return normCur(item && item.priceCurrency) || LEGACY_CURRENCY;
+    }
+
+    /* Währung eines Eintrags aus Verlauf / Vorrat */
+    function entryCur(entry, item) {
+        return normCur(entry && entry.currency) || itemCur(item);
+    }
+
+    /* Betrag von einer Währung in eine andere; NaN, wenn kein Kurs vorhanden */
+    function convert(amount, from, to) {
+        var n = parseNum(amount) || 0;
+        from = from || LEGACY_CURRENCY;
+        to = to || currency;
+        if (from === to || n === 0) return n;
+        if (!hasRate()) return NaN;
+        return from === 'EUR' ? n * rate.value : n / rate.value;
+    }
+
+    /* Für Summen: umgerechnet, ohne Kurs nur gleiche Währung (sonst 0 + Zähler) */
+    var convSkipped = 0;
+    function toDisplay(amount, from) {
+        var v = convert(amount, from, currency);
+        if (isNaN(v)) { convSkipped++; return 0; }
+        return v;
+    }
+
+    /* Für Sortierung: alles in EUR (ohne Kurs: Rohwert) */
+    function priceInEur(item) {
+        var v = convert(item.price, itemCur(item), 'EUR');
+        return isNaN(v) ? (parseNum(item.price) || 0) : v;
+    }
+
+    function formatMoney(val, cur) {
+        var num = parseNum(val) || 0;
+        if (cur === 'EUR') return num.toFixed(2).replace('.', ',') + ' €';
+        return num.toFixed(2) + ' CHF';
+    }
+
+    /* Preis in Anzeigewährung, bei Umrechnung zusätzlich der Originalpreis */
+    function priceHtml(amount, from) {
+        from = from || LEGACY_CURRENCY;
+        var n = parseNum(amount) || 0;
+        if (from === currency || n === 0) return formatMoney(n, currency);
+        var conv = convert(n, from, currency);
+        if (isNaN(conv)) return formatMoney(n, from); // kein Kurs → ehrlich in Originalwährung zeigen
+        return formatMoney(conv, currency) + ' <span class="orig-price">(' + formatMoney(n, from) + ')</span>';
+    }
+
+    /* Einmalig: allen Einträgen ohne Kaufwährung eine Währung zuweisen */
+    function assignLegacyCurrency() {
+        var missing = whiskeys.filter(function(w) { return !normCur(w.priceCurrency); });
+        if (!missing.length) { showToast('Alle Flaschen haben bereits eine Kaufwährung'); return; }
+        var ans = prompt(missing.length + ' Flasche(n) haben noch keine Kaufwährung und werden im Moment als ' + LEGACY_CURRENCY + ' gerechnet.\n\n' +
+            'In welcher Währung wurden diese gekauft? (CHF oder EUR)\n' +
+            'Gilt auch für ihre früheren Käufe und den Vorrat. Einzelne Ausnahmen kannst du danach über ✏️ Bearbeiten korrigieren.', 'CHF');
+        if (ans === null) return;
+        ans = normCur(ans);
+        if (!ans) { alert('Bitte CHF oder EUR eingeben.'); return; }
+        missing.forEach(function(w) {
+            w.priceCurrency = ans;
+            (Array.isArray(w.purchaseHistory) ? w.purchaseHistory : []).concat(reserveOf(w)).forEach(function(h) {
+                if (!normCur(h.currency)) h.currency = ans;
+            });
+        });
+        renderApp();
+        markChanged();
+        showToast(missing.length + ' Flasche(n) auf ' + ans + ' gesetzt', 3000);
     }
 
     function parseNum(v) {
@@ -2020,9 +2255,7 @@
     }
 
     function formatCurrency(val) {
-        var num = parseNum(val) || 0;
-        if (currency === 'EUR') return num.toFixed(2).replace('.', ',') + ' €';
-        return num.toFixed(2) + ' CHF';
+        return formatMoney(val, currency);
     }
 
     function formatDateDE(dateStr) {
@@ -2083,6 +2316,7 @@
         item.purchaseHistory.push({
             date: item.purchaseDate || '',
             price: item.price || 0,
+            currency: itemCur(item),
             location: item.location || '',
             source: item.source || 'Gekauft',
             opened: item.openedDate || '',
@@ -2097,6 +2331,7 @@
         var next = r.shift();
         pushHistory(item);
         item.price = next.price || 0;
+        item.priceCurrency = entryCur(next, item);
         item.purchaseDate = next.date || '';
         item.location = next.location || '';
         item.source = next.source || 'Gekauft';
@@ -2235,7 +2470,7 @@
         } else if (sortBy === 'rating') {
             filtered.sort(function(a, b) { return (parseNum(b.rating) || 0) - (parseNum(a.rating) || 0); });
         } else if (sortBy === 'priceDesc') {
-            filtered.sort(function(a, b) { return (parseNum(b.price) || 0) - (parseNum(a.price) || 0); });
+            filtered.sort(function(a, b) { return priceInEur(b) - priceInEur(a); });
         } else if (sortBy === 'name') {
             filtered.sort(byName);
         } else if (sortBy === 'fillAsc') {
@@ -2247,7 +2482,8 @@
     }
 
     function computeSummary() {
-        var s = { bottles: 0, full: 0, open: 0, low: 0, empty: 0, wish: 0, value: 0, kinds: 0 };
+        var s = { bottles: 0, full: 0, open: 0, low: 0, empty: 0, wish: 0, value: 0, kinds: 0, skipped: 0, legacy: 0 };
+        convSkipped = 0;
         whiskeys.forEach(function(w) {
             var st = fillState(w);
             var r = reserveOf(w);
@@ -2258,13 +2494,15 @@
                 s.bottles++;
                 if (st === 'full') s.full++; else s.open++;
                 if (isLow(w)) s.low++;
-                s.value += parseNum(w.price) || 0;
+                s.value += toDisplay(w.price, itemCur(w));
             }
             s.bottles += r.length;
             s.full += r.length;
-            r.forEach(function(x) { s.value += parseNum(x.price) || 0; });
+            r.forEach(function(x) { s.value += toDisplay(x.price, entryCur(x, w)); });
             if (w.wishlist) s.wish++;
+            if (!normCur(w.priceCurrency) && (parseNum(w.price) || 0) > 0) s.legacy++;
         });
+        s.skipped = convSkipped;
         return s;
     }
 
@@ -2279,6 +2517,12 @@
         document.getElementById('statCountSub').textContent = s.full + ' voll · ' + s.open + ' angebrochen';
         document.getElementById('statValue').textContent = formatCurrency(s.value);
         document.getElementById('statValueSub').textContent = plural(s.kinds, 'Sorte', 'Sorten') + ' im Schrank';
+        var rateMsg = rateText();
+        if (s.skipped) rateMsg += ' · ⚠ ' + s.skipped + ' Preis(e) in anderer Währung nicht eingerechnet';
+        if (s.legacy) rateMsg += ' · ' + s.legacy + ' ohne Kaufwährung (als ' + LEGACY_CURRENCY + ' gezählt)';
+        var rateEl = document.getElementById('statRate');
+        rateEl.textContent = rateMsg;
+        rateEl.classList.toggle('warn', !!s.skipped);
         document.getElementById('statArchive').textContent = s.empty;
         document.getElementById('statArchiveSub').textContent = s.wish ? '🛒 ' + s.wish + ' auf der Einkaufsliste' : 'schon getrunken';
         var rated = whiskeys.filter(function(w) { return (parseNum(w.rating) || 0) > 0; });
@@ -2381,7 +2625,7 @@
                         (cnt > 1 ? '<span class="tag">🔁 ' + cnt + '× gekauft</span>' : '') +
                         (item.wishlist && currentView !== 'shopping' ? '<span class="tag">🛒 Einkaufsliste</span>' : '') +
                     '</div>' +
-                    '<div class="meta-line"><span class="price-tag">' + formatCurrency(item.price) + '</span><span>' + dateLine + '</span></div>' +
+                    '<div class="meta-line"><span class="price-tag">' + priceHtml(item.price, itemCur(item)) + '</span><span>' + dateLine + '</span></div>' +
                     (low && !item.wishlist && currentView === 'inventory' ? '<div class="card-hint">Fast leer – auf die Einkaufsliste? 🛒</div>' : '') +
                 '</div>' +
             '</div>' +
@@ -2444,6 +2688,10 @@
         if (best) setVal('fieldRegion', best);
     }
 
+    function defaultBuyCurrency() {
+        return normCur(lsGet('kowi_tresor_buycur')) || currency;
+    }
+
     function openFormModal(id) {
         fillSuggestions();
         var item = id !== undefined ? findById(id) : null;
@@ -2459,6 +2707,7 @@
             setVal('fieldAbv', item.abv);
             setVal('fieldVolume', item.volume);
             setVal('fieldPrice', item.price);
+            setVal('fieldPriceCurrency', itemCur(item));
             setVal('fieldRating', item.rating);
             setVal('fieldFillLevel', getFill(item));
             document.getElementById('fillLevelVal').textContent = getFill(item);
@@ -2482,6 +2731,7 @@
             document.getElementById('fillLevelVal').textContent = '100';
             setVal('fieldSource', 'Gekauft');
             setVal('fieldPurchaseCount', 1);
+            setVal('fieldPriceCurrency', defaultBuyCurrency());
             setVal('fieldOpened', '');
             setVal('fieldEmptied', '');
             document.getElementById('fieldWishlist').checked = false;
@@ -2538,6 +2788,8 @@
         var existing = id ? findById(id) : null;
         var rating = parseNum(getVal('fieldRating'));
         if (!isNaN(rating)) rating = Math.min(5, Math.max(0, rating));
+        var buyCur = normCur(document.getElementById('fieldPriceCurrency').value) || 'CHF';
+        lsSet('kowi_tresor_buycur', buyCur);
 
         var fields = {
             name: getVal('fieldName'),
@@ -2548,6 +2800,7 @@
             abv: numOrText(getVal('fieldAbv')),
             volume: getVal('fieldVolume'),
             price: getVal('fieldPrice') === '' ? 0 : numOrText(getVal('fieldPrice')),
+            priceCurrency: buyCur,
             purchaseDate: getVal('fieldPurchaseDate'),
             source: document.getElementById('fieldSource').value,
             location: getVal('fieldLocation'),
@@ -2578,7 +2831,7 @@
             whiskeys.unshift({
                 id: newItem.id, name: newItem.name, distillery: newItem.distillery, region: newItem.region,
                 style: newItem.style, age: newItem.age, abv: newItem.abv, volume: newItem.volume,
-                price: newItem.price, purchaseDate: newItem.purchaseDate, source: newItem.source,
+                price: newItem.price, priceCurrency: newItem.priceCurrency, purchaseDate: newItem.purchaseDate, source: newItem.source,
                 location: newItem.location, rating: newItem.rating, fillLevel: newItem.fillLevel,
                 purchaseCount: newItem.purchaseCount, notes: newItem.notes, image: newItem.image,
                 wishlist: newItem.wishlist, openedDate: openedIn, emptiedDate: emptiedIn
@@ -2697,7 +2950,7 @@
         setVal('rebuyDate', todayISO());
         setVal('rebuyLocation', item.location || '');
         setVal('rebuySource', 'Gekauft');
-        document.getElementById('rebuyPriceLabel').textContent = 'Preis (' + currency + ')';
+        setVal('rebuyCurrency', itemCur(item));
         var st = fillState(item);
         document.getElementById('rebuyInfo').textContent = st === 'empty'
             ? 'Die Flasche kommt als volle Flasche zurück in den Schrank. Der bisherige Kauf bleibt im Verlauf.'
@@ -2716,6 +2969,7 @@
         var buy = {
             date: getVal('rebuyDate') || todayISO(),
             price: priceIn === '' ? 0 : numOrText(priceIn),
+            currency: normCur(document.getElementById('rebuyCurrency').value) || itemCur(item),
             location: getVal('rebuyLocation'),
             source: document.getElementById('rebuySource').value
         };
@@ -2723,6 +2977,7 @@
         if (wasEmpty) {
             pushHistory(item);
             item.price = buy.price;
+            item.priceCurrency = buy.currency;
             item.purchaseDate = buy.date;
             item.location = buy.location;
             item.source = buy.source;
@@ -2770,17 +3025,18 @@
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Stil</div><strong>' + escapeHtml(item.style || '') + '</strong></div>' +
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Alter / Jahrgang</div><strong>' + (escapeHtml(fmtAge(item.age)) || '–') + '</strong></div>' +
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Alkohol / Volumen</div><strong>' + (item.abv ? escapeHtml(item.abv) + '%' : '–') + (item.volume ? ' • ' + escapeHtml(item.volume) : '') + '</strong></div>' +
-                '<div class="stat-card" style="padding:10px;"><div class="stat-header">Preis</div><strong class="text-gold">' + formatCurrency(item.price) + '</strong></div>' +
+                '<div class="stat-card" style="padding:10px;"><div class="stat-header">Preis</div><strong class="text-gold">' + priceHtml(item.price, itemCur(item)) + '</strong></div>' +
             '</div>' +
             '<div class="stat-card" style="padding:12px; margin-bottom:14px;">' +
                 '<div class="meta-line"><span>Quelle:</span><span>' + escapeHtml(item.source || 'Gekauft') + '</span></div>' +
                 '<div class="meta-line"><span>Kaufort / Schenker:</span><span>' + escapeHtml(item.location || 'Nicht angegeben') + '</span></div>' +
+                '<div class="meta-line"><span>Gekauft in:</span><span>' + itemCur(item) + (normCur(item.priceCurrency) ? '' : ' (angenommen)') + '</span></div>' +
                 '<div class="meta-line"><span>' + (getCount(item) > 1 ? 'Letzter Kauf:' : 'Kaufdatum:') + '</span><span>' + escapeHtml(formatDateDE(item.purchaseDate)) + '</span></div>' +
                 (item.openedDate ? '<div class="meta-line"><span>Geöffnet am:</span><span>' + escapeHtml(formatDateDE(item.openedDate)) + '</span></div>' : '') +
                 (item.emptiedDate ? '<div class="meta-line"><span>Leer seit:</span><span>' + escapeHtml(formatDateDE(item.emptiedDate)) + '</span></div>' : '') +
                 '<div class="meta-line"><span>Anzahl gekauft:</span><span>' + getCount(item) + '×</span></div>' +
                 (item.wishlist ? '<div class="meta-line"><span>Einkaufsliste:</span><span>🛒 ja</span></div>' : '') +
-                reserveHtml(res) +
+                reserveHtml(res, item) +
                 historyHtml(item) +
             '</div>' +
             (item.notes ? '<div class="stat-card" style="padding:12px; margin-bottom:14px;"><div class="stat-header" style="margin-bottom:4px;">Tasting Notes</div><p style="font-size:14px; white-space:pre-line;">' + escapeHtml(item.notes) + '</p></div>' : '') +
@@ -2801,10 +3057,10 @@
         document.getElementById('detailContent').scrollTop = 0;
     }
 
-    function reserveHtml(res) {
+    function reserveHtml(res, item) {
         if (!res.length) return '';
         var rows = res.map(function(p) {
-            return '<li><span>📦 ' + escapeHtml(formatDateDE(p.date)) + (p.location ? ' • ' + escapeHtml(p.location) : '') + '</span><span>' + formatCurrency(p.price) + '</span></li>';
+            return '<li><span>📦 ' + escapeHtml(formatDateDE(p.date)) + (p.location ? ' • ' + escapeHtml(p.location) : '') + '</span><span>' + priceHtml(p.price, entryCur(p, item)) + '</span></li>';
         }).join('');
         return '<div class="stat-header" style="margin-top:8px;">Im Vorrat (noch verschlossen)</div><ul class="history-list">' + rows + '</ul>';
     }
@@ -2815,7 +3071,7 @@
         var rows = h.slice().reverse().map(function(p) {
             return '<li><span>' + escapeHtml(formatDateDE(p.date)) + (p.location ? ' • ' + escapeHtml(p.location) : '') +
                 (p.emptied ? ' <span style="color:var(--text-muted);">(leer ' + escapeHtml(formatDateDE(p.emptied)) + ')</span>' : '') +
-                '</span><span>' + formatCurrency(p.price) + '</span></li>';
+                '</span><span>' + priceHtml(p.price, entryCur(p, item)) + '</span></li>';
         }).join('');
         return '<div class="stat-header" style="margin-top:8px;">Frühere Flaschen</div><ul class="history-list">' + rows + '</ul>';
     }
@@ -2895,12 +3151,12 @@
     function allPurchases() {
         var out = [];
         whiskeys.forEach(function(w) {
-            out.push({ w: w, date: w.purchaseDate, price: w.price, source: w.source });
+            out.push({ w: w, date: w.purchaseDate, price: w.price, cur: itemCur(w), source: w.source });
             (Array.isArray(w.purchaseHistory) ? w.purchaseHistory : []).forEach(function(h) {
-                out.push({ w: w, date: h.date, price: h.price, source: h.source || 'Gekauft' });
+                out.push({ w: w, date: h.date, price: h.price, cur: entryCur(h, w), source: h.source || 'Gekauft' });
             });
             reserveOf(w).forEach(function(r) {
-                out.push({ w: w, date: r.date, price: r.price, source: r.source || 'Gekauft' });
+                out.push({ w: w, date: r.date, price: r.price, cur: entryCur(r, w), source: r.source || 'Gekauft' });
             });
         });
         return out;
@@ -2926,9 +3182,10 @@
         var s = computeSummary();
         var buys = allPurchases();
         var spent = 0, gifts = 0, byYear = {}, styles = {}, regions = {}, distilleries = {};
+        convSkipped = 0;
         buys.forEach(function(b) {
             if ((b.source || 'Gekauft') === 'Geschenk') { gifts++; return; }
-            var p = parseNum(b.price) || 0;
+            var p = toDisplay(b.price, b.cur);
             spent += p;
             var y = b.date ? String(b.date).slice(0, 4) : '';
             if (/^\d{4}$/.test(y)) byYear[y] = (byYear[y] || 0) + p;
@@ -2963,6 +3220,8 @@
                 kpi('Geschenke', gifts) +
                 kpi('Ausgaben total', formatCurrency(spent), true) +
             '</div>' +
+            '<p class="hint" style="margin:-8px 0 14px;">Beträge in ' + currency + ' · ' + escapeHtml(rateText()) +
+                (convSkipped ? ' · ⚠ ' + convSkipped + ' Kauf/Käufe in anderer Währung nicht eingerechnet' : '') + '</p>' +
             '<div class="stats-section"><h3>Ausgaben pro Jahr</h3>' + barsHtml(years, formatCurrency) + '</div>' +
             '<div class="stats-section"><h3>Stile</h3>' + barsHtml(topCounts(styles, 6)) + '</div>' +
             '<div class="stats-section"><h3>Regionen</h3>' + barsHtml(topCounts(regions, 5)) + '</div>' +
@@ -2981,11 +3240,13 @@
 
     function exportCSV() {
         var head = ['Name', 'Destillerie', 'Region', 'Stil', 'Alter', 'Vol. %', 'Volumen', 'Status', 'Füllstand %', 'Vorrat',
-            'Preis (' + currency + ')', 'Kaufdatum', 'Quelle', 'Kaufort', 'Bewertung', 'Anzahl gekauft', 'Geöffnet am', 'Leer seit', 'Einkaufsliste', 'Notizen'];
+            'Preis', 'Währung', 'Preis (' + currency + ')', 'Kaufdatum', 'Quelle', 'Kaufort', 'Bewertung', 'Anzahl gekauft', 'Geöffnet am', 'Leer seit', 'Einkaufsliste', 'Notizen'];
         var rows = whiskeys.slice().sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'de'); }).map(function(w) {
             return [w.name, w.distillery, w.region, w.style, w.age, String(w.abv || '').replace('.', ','), w.volume,
                 fillWord(getFill(w)), getFill(w), reserveOf(w).length,
-                String(parseNum(w.price) || 0).replace('.', ','), formatDateDE(w.purchaseDate), w.source || 'Gekauft', w.location,
+                String(parseNum(w.price) || 0).replace('.', ','), itemCur(w),
+                (function() { var v = convert(w.price, itemCur(w), currency); return isNaN(v) ? '' : v.toFixed(2).replace('.', ','); })(),
+                formatDateDE(w.purchaseDate), w.source || 'Gekauft', w.location,
                 String(w.rating || '').replace('.', ','), getCount(w),
                 w.openedDate ? formatDateDE(w.openedDate) : '', w.emptiedDate ? formatDateDE(w.emptiedDate) : '',
                 w.wishlist ? 'ja' : '', w.notes];
