@@ -20,13 +20,19 @@
             --bg-dark: #0f0d0b;
             --bg-card: rgba(28, 24, 20, 0.84);
             --bg-darker: rgba(18, 15, 12, 0.90);
+            --surface: #1c1814;            /* Dialoge, Menüs */
+            --shade: rgba(15, 13, 11, 0.85); /* Kartenfuss */
             --border: rgba(212, 163, 89, 0.28);
             --text-main: #f5f0e6;
             --text-muted: #b8ad9e;
             --gold-400: #e5b869;
             --gold-500: #d4a359;
             --gold-600: #b88439;
+            --amber-light: #e5b869;
+            --oak-dark: #f5f0e6;           /* helle Linien/Titel auf dunklem Grund */
             --emerald-600: #059669;
+            --danger: #fca5a5;
+            --shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-right: env(safe-area-inset-right, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -116,9 +122,24 @@
             font-family: Georgia, "Times New Roman", serif;
             font-size: 22px;
             font-weight: 700;
-            color: var(--text-main);
+            color: var(--oak-dark);
             letter-spacing: 0.02em;
             line-height: 1.2;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            flex: 0 0 auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
 
         .brand-sub {
@@ -187,7 +208,7 @@
             top: calc(100% + 8px);
             width: 260px;
             max-width: calc(100vw - 32px);
-            background-color: #1c1814;
+            background-color: var(--surface);
             border: 1px solid var(--border);
             border-radius: 14px;
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
@@ -306,7 +327,11 @@
             border-radius: 16px;
             padding: 14px 16px;
             min-width: 0;
+            box-shadow: var(--shadow);
         }
+
+        .stat-card.clickable { cursor: pointer; }
+        .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
         .stat-header {
             display: flex;
@@ -411,6 +436,7 @@
             border: 1px solid var(--border);
             border-radius: 18px;
             overflow: hidden;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -497,14 +523,15 @@
         }
 
         .card.is-empty .card-img-box img { filter: grayscale(.85) brightness(.6); }
-        .card.is-empty .card-title { opacity: .7; }
+        .card.is-empty .card-title { opacity: .85; }
         .badge-state {
             position: absolute; top: 10px; left: 10px; padding: 3px 9px; border-radius: 999px;
             font-size: 11px; font-weight: 700; letter-spacing: .02em;
-            background: rgba(0,0,0,.65); color: #fff; border: 1px solid rgba(255,255,255,.25);
+            background: rgba(0,0,0,.65); color: #fff; border: 1px solid rgba(255,255,255,.35);
         }
         .badge-state.empty { background: rgba(140,30,30,.85); }
-        .badge-state.open { background: rgba(176,120,30,.85); }
+        .badge-state.open { background: rgba(184,116,42,.92); }
+        .badge-state.low { background: rgba(200,60,40,.90); }
         .history-list { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13px; }
         .history-list li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-top: 1px solid var(--border); }
         .tag {
@@ -528,7 +555,7 @@
         .meta-line span:last-child { text-align: right; }
 
         .card-footer {
-            background: rgba(15, 13, 11, 0.85);
+            background: var(--shade);
             border-top: 1px solid var(--border);
             padding: 10px 14px;
             display: flex;
@@ -559,9 +586,10 @@
         .modal-backdrop.open { display: flex; }
 
         .modal-box {
-            background-color: #1c1814;
+            background-color: var(--surface);
             border: 1px solid var(--border);
             border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 540px;
             max-height: 100%;
@@ -685,8 +713,224 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* Ansichten: Im Schrank / Archiv / Einkaufsliste */
+        .view-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            flex: 1 1 auto;
+            max-width: 560px;
+            box-shadow: var(--shadow);
+        }
+
+        .tab {
+            flex: 1 1 0;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 9px 8px;
+            min-height: 42px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+            color: #14110e;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+        }
+
+        .tab-count {
+            display: inline-block;
+            min-width: 20px;
+            padding: 0 6px;
+            margin-left: 4px;
+            border-radius: 999px;
+            font-size: 11px;
+            background: rgba(212, 163, 89, 0.18);
+        }
+
+        .tab.active .tab-count { background: rgba(0, 0, 0, 0.18); }
+
+        @media (max-width: 480px) {
+            .tab { font-size: 13px; padding: 9px 4px; }
+            .view-bar .btn { flex: 1 1 100%; }
+            .tabs { max-width: none; }
+        }
+
+        .btn-toggle.on {
+            background: rgba(212, 163, 89, 0.22);
+            border-color: var(--gold-500);
+        }
+
+        .card-hint {
+            font-size: 12px;
+            color: var(--danger);
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        /* Füllstand-Dialog mit Flaschengrafik */
+        .fill-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            margin: 6px 0 4px;
+        }
+
+        .bottle {
+            position: relative;
+            width: 62px;
+            height: 150px;
+            border: 3px solid var(--oak-dark);
+            border-radius: 18px 18px 14px 14px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .bottle::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            width: 22px;
+            height: 14px;
+            transform: translateX(-50%);
+            background: var(--oak-dark);
+            border-radius: 0 0 4px 4px;
+            z-index: 2;
+        }
+
+        .bottle-liquid {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, var(--amber-light), var(--gold-600));
+            transition: height 0.2s;
+        }
+
+        .bottle.small { width: 34px; height: 82px; border-width: 2px; border-radius: 11px 11px 8px 8px; }
+        .bottle.small::before { width: 12px; height: 8px; top: -2px; }
+
+        .fill-big {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--gold-400);
+            min-width: 90px;
+        }
+
+        .fill-big small {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .quick-fill {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .quick-fill .btn { padding: 8px 4px; font-size: 13px; }
+
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            padding: 10px 12px;
+            min-height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-darker);
+            cursor: pointer;
+        }
+
+        .check-row input { width: 20px; height: 20px; accent-color: var(--gold-500); }
+
+        /* Statistik */
+        .stats-section { margin-bottom: 16px; }
+        .stats-section h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 480px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .kpi-grid .stat-card { padding: 10px 12px; box-shadow: none; }
+        .kpi-grid .stat-val { font-size: 19px; margin-top: 2px; }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: minmax(0, 38%) 1fr auto;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            padding: 4px 0;
+        }
+
+        .bar-row .bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .bar-row .bar-val { font-weight: 700; color: var(--gold-400); text-align: right; min-width: 40px; }
+        .bar-track { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold-600), var(--amber-light)); }
+
+        /* Vorschlag */
+        .suggest-box {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--bg-darker);
+            margin-bottom: 14px;
+        }
+
+        .suggest-name {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--oak-dark);
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .suggest-reason { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
         @media (max-width: 380px) {
             .brand-title { font-size: 19px; }
+            .brand-logo { width: 38px; height: 38px; }
             .stat-val { font-size: 19px; }
         }
 
@@ -735,10 +979,13 @@
 <div class="app-shell">
 <header>
     <div class="header-inner">
-        <div>
-            <div class="brand-title">Kowi's Whisky Tresor</div>
-            <div class="brand-sub">Deine private Schatzkammer für edle Tropfen &amp; Herkunft</div>
-            <div id="saveStatus" class="save-status" aria-live="polite"></div>
+        <div class="brand">
+            <img class="brand-logo" src="apple-touch-icon.png" alt="" onerror="this.style.display='none'">
+            <div style="min-width:0;">
+                <div class="brand-title">Kowi's Whisky Tresor</div>
+                <div class="brand-sub">Deine private Schatzkammer für edle Tropfen &amp; Herkunft</div>
+                <div id="saveStatus" class="save-status" aria-live="polite"></div>
+            </div>
         </div>
 
         <div class="header-actions">
@@ -752,6 +999,9 @@
                 <div class="dropdown-divider"></div>
                 <button type="button" class="dropdown-item" onclick="closeMenu(); openImportModal()">📥 Import (.json / .csv)</button>
                 <button type="button" class="dropdown-item" onclick="closeMenu(); exportJSON()">📤 Kopie exportieren (.json)</button>
+                <button type="button" class="dropdown-item" onclick="closeMenu(); exportCSV()">📄 Liste für Excel (.csv)</button>
+                <div class="dropdown-divider"></div>
+                <button type="button" class="dropdown-item" onclick="closeMenu(); openStatsModal()">📊 Statistik</button>
                 <div class="dropdown-divider"></div>
                 <button type="button" class="dropdown-item" onclick="closeMenu(); pickBackground()">🖼️ Hintergrundbild wählen</button>
                 <button type="button" class="dropdown-item" onclick="closeMenu(); resetBackground()">↩️ Hintergrund zurücksetzen</button>
@@ -778,22 +1028,35 @@
     <input type="file" id="bgPicker" accept="image/*" class="visually-hidden" tabindex="-1" onchange="handleBackgroundSelected(event)">
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-header"><span>Flaschen gesamt</span><span>🍾</span></div>
+        <div class="stat-card clickable" onclick="setView('inventory')">
+            <div class="stat-header"><span>Im Schrank</span><span>🥃</span></div>
             <div class="stat-val" id="statCount">0</div>
+            <div class="stat-sub" id="statCountSub">–</div>
         </div>
         <div class="stat-card">
-            <div class="stat-header"><span>Gesamtwert</span><span>💰</span></div>
+            <div class="stat-header"><span>Kaufwert im Schrank</span><span>💰</span></div>
             <div class="stat-val text-gold" id="statValue">0,00 €</div>
+            <div class="stat-sub" id="statValueSub">–</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-header"><span>Ø Preis</span><span>🏷️</span></div>
-            <div class="stat-val" id="statAvgPrice">0,00 €</div>
+        <div class="stat-card clickable" onclick="setView('archive')">
+            <div class="stat-header"><span>Archiv (leer)</span><span>📦</span></div>
+            <div class="stat-val" id="statArchive">0</div>
+            <div class="stat-sub" id="statArchiveSub">–</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" onclick="openStatsModal()">
             <div class="stat-header"><span>Ø Bewertung</span><span>🏆</span></div>
             <div class="stat-val text-gold" id="statAvgRating">0.0 ★</div>
+            <div class="stat-sub">📊 Statistik ansehen</div>
         </div>
+    </div>
+
+    <div class="view-bar">
+        <div class="tabs" role="tablist">
+            <button type="button" class="tab active" data-view="inventory" role="tab" onclick="setView('inventory')">🥃 Im Schrank<span class="tab-count" id="cntInventory">0</span></button>
+            <button type="button" class="tab" data-view="archive" role="tab" onclick="setView('archive')">📦 Archiv<span class="tab-count" id="cntArchive">0</span></button>
+            <button type="button" class="tab" data-view="shopping" role="tab" onclick="setView('shopping')">🛒 Einkauf<span class="tab-count" id="cntShopping">0</span></button>
+        </div>
+        <button type="button" id="suggestBtn" class="btn btn-secondary" onclick="suggestDram()">🎲 Was trinke ich heute?</button>
     </div>
 
     <div class="filter-bar">
@@ -823,16 +1086,17 @@
                 <option value="multi">🔁 Mehrfach gekauft</option>
             </select>
         </div>
-        <div class="filter-select">
+        <div class="filter-select" id="fillFilterWrap">
             <select id="fillFilter" class="select-control" onchange="renderApp()">
-                <option value="">Alle Füllstände</option>
+                <option value="">Alle im Schrank</option>
                 <option value="full">Volle Flaschen</option>
                 <option value="open">Angebrochene Flaschen</option>
-                <option value="empty">Leere Flaschen</option>
+                <option value="low">Fast leer (≤ 25 %)</option>
             </select>
         </div>
         <div class="filter-select">
             <select id="sortFilter" class="select-control" onchange="renderApp()">
+                <option value="smart">Empfohlen</option>
                 <option value="newest">Neueste zuerst</option>
                 <option value="rating">Beste Bewertung</option>
                 <option value="priceDesc">Preis absteigend</option>
@@ -862,7 +1126,7 @@
     <div class="modal-box" role="dialog" aria-modal="true">
         <div class="modal-header">
             <h2 id="formModalTitle">Flasche hinzufügen</h2>
-            <button type="button" class="btn btn-secondary btn-icon" aria-label="Schließen" onclick="closeFormModal()">✕</button>
+            <button type="button" class="btn btn-secondary btn-icon" aria-label="Schliessen" onclick="closeFormModal()">✕</button>
         </div>
         <form id="whiskeyForm" onsubmit="saveWhiskey(event)">
             <input type="hidden" id="fieldId">
@@ -944,6 +1208,18 @@
 
             <div class="form-row form-row-2">
                 <div class="form-group">
+                    <label class="form-label" for="fieldOpened">Geöffnet am</label>
+                    <input type="date" id="fieldOpened" class="input-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="fieldEmptied">Leer seit</label>
+                    <input type="date" id="fieldEmptied" class="input-control">
+                </div>
+            </div>
+            <p class="hint" style="margin:-8px 0 14px;">Wird automatisch gesetzt, wenn du den Füllstand änderst.</p>
+
+            <div class="form-row form-row-2">
+                <div class="form-group">
                     <label class="form-label" for="fieldSource">Quelle</label>
                     <select id="fieldSource" class="select-control">
                         <option value="Gekauft">Gekauft</option>
@@ -963,6 +1239,10 @@
                     <img id="imagePreview" src="" alt="" style="width:60px; height:60px; object-fit:cover; border-radius:10px; border:1px solid var(--border);">
                     <button type="button" class="btn btn-danger" onclick="clearImage()">Foto entfernen</button>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label class="check-row"><input type="checkbox" id="fieldWishlist"> 🛒 Auf der Einkaufsliste</label>
             </div>
 
             <div class="form-group">
@@ -993,7 +1273,7 @@
     <div class="modal-box" role="dialog" aria-modal="true">
         <div class="modal-header">
             <h2>Sammlung importieren</h2>
-            <button type="button" class="btn btn-secondary btn-icon" aria-label="Schließen" onclick="closeImportModal()">✕</button>
+            <button type="button" class="btn btn-secondary btn-icon" aria-label="Schliessen" onclick="closeImportModal()">✕</button>
         </div>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
             Wähle eine <strong>.json</strong>-Backup-Datei oder eine <strong>.csv</strong>-Exportdatei aus „The Stillman“.
@@ -1014,6 +1294,79 @@
             <button type="button" class="btn btn-primary" onclick="processImport()">📥 Importieren</button>
         </div>
     </div>
+</div>
+
+<!-- Modal: Füllstand -->
+<div id="fillModal" class="modal-backdrop" onclick="backdropClose(event, closeFillModal)">
+    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:440px;">
+        <div class="modal-header">
+            <h2 id="fillModalTitle">Füllstand</h2>
+            <button type="button" class="btn btn-secondary btn-icon" aria-label="Schliessen" onclick="closeFillModal()">✕</button>
+        </div>
+        <input type="hidden" id="fillItemId">
+        <div class="fill-visual">
+            <div class="bottle"><div class="bottle-liquid" id="fillLiquid" style="height:100%;"></div></div>
+            <div class="fill-big" id="fillBig">100%<small>Voll</small></div>
+        </div>
+        <input type="range" min="0" max="100" step="5" id="quickFill" value="100" oninput="updateFillPreview()">
+        <div class="quick-fill">
+            <button type="button" class="btn btn-secondary" onclick="setQuickFill(100)">Voll</button>
+            <button type="button" class="btn btn-secondary" onclick="setQuickFill(75)">¾</button>
+            <button type="button" class="btn btn-secondary" onclick="setQuickFill(50)">½</button>
+            <button type="button" class="btn btn-secondary" onclick="setQuickFill(25)">¼</button>
+            <button type="button" class="btn btn-secondary" onclick="setQuickFill(0)">Leer</button>
+        </div>
+        <label class="check-row"><input type="checkbox" id="quickWishlist"> 🛒 Auf die Einkaufsliste</label>
+        <p class="hint" id="quickHint"></p>
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeFillModal()">Abbrechen</button>
+            <button type="button" class="btn btn-primary" onclick="saveFill()">💾 Speichern</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nachkauf -->
+<div id="rebuyModal" class="modal-backdrop" onclick="backdropClose(event, closeRebuyModal)">
+    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:460px;">
+        <div class="modal-header">
+            <h2 id="rebuyTitle">Nachgekauft</h2>
+            <button type="button" class="btn btn-secondary btn-icon" aria-label="Schliessen" onclick="closeRebuyModal()">✕</button>
+        </div>
+        <input type="hidden" id="rebuyItemId">
+        <p class="hint" id="rebuyInfo" style="margin:0 0 14px; font-size:13px;"></p>
+        <div class="form-row form-row-2">
+            <div class="form-group">
+                <label class="form-label" id="rebuyPriceLabel" for="rebuyPrice">Preis</label>
+                <input type="text" inputmode="decimal" id="rebuyPrice" class="input-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="rebuyDate">Kaufdatum</label>
+                <input type="date" id="rebuyDate" class="input-control">
+            </div>
+        </div>
+        <div class="form-row form-row-2">
+            <div class="form-group">
+                <label class="form-label" for="rebuySource">Quelle</label>
+                <select id="rebuySource" class="select-control">
+                    <option value="Gekauft">Gekauft</option>
+                    <option value="Geschenk">Geschenk</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="rebuyLocation">Kaufort / Schenker</label>
+                <input type="text" id="rebuyLocation" list="dlLocation" class="input-control" autocomplete="off">
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeRebuyModal()">Abbrechen</button>
+            <button type="button" class="btn btn-primary" onclick="confirmRebuy()">🔁 Nachkauf erfassen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Vorschlag / Statistik -->
+<div id="infoModal" class="modal-backdrop" onclick="backdropClose(event, closeInfoModal)">
+    <div class="modal-box" id="infoContent" role="dialog" aria-modal="true"></div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -1118,6 +1471,9 @@
         if (!it.source) it.source = /geschenk/i.test(it.location) ? 'Geschenk' : 'Gekauft';
         if (it.id === undefined || it.id === null || it.id === '') it.id = Date.now() + (i || 0);
         if (!it.style) it.style = 'Single Malt';
+        if (it.reserve !== undefined && !Array.isArray(it.reserve)) delete it.reserve;
+        if (Array.isArray(it.reserve) && !it.reserve.length) delete it.reserve;
+        if (it.wishlist !== undefined) it.wishlist = !!it.wishlist;
         return it;
     }
 
@@ -1455,33 +1811,36 @@
         var jsonStr = serialize();
         var fileName = markSaved ? backupFileName()
             : backupFileName().replace(/\.json$/i, '') + '_kopie_' + new Date().toISOString().slice(0, 10) + '.json';
-        var isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-        var done = function() {
+        shareOrDownload(jsonStr, fileName, 'application/json', function() {
             if (markSaved) {
                 meta.dirty = false;
                 meta.savedAt = Date.now();
                 cacheLocal();
                 refreshStatus();
             }
-        };
+        });
+    }
 
+    function shareOrDownload(text, fileName, mime, done) {
+        done = done || function() {};
+        var isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
         if (isTouch && navigator.canShare && typeof File === 'function') {
             try {
-                var file = new File([jsonStr], fileName, { type: 'application/json' });
+                var file = new File([text], fileName, { type: mime });
                 if (navigator.canShare({ files: [file] })) {
                     navigator.share({ files: [file] }).then(done).catch(function(err) {
-                        if (err && err.name !== 'AbortError') { downloadBlob(jsonStr, fileName); done(); }
+                        if (err && err.name !== 'AbortError') { downloadBlob(text, fileName, mime); done(); }
                     });
                     return;
                 }
             } catch (e) { /* weiter zum Download */ }
         }
-        downloadBlob(jsonStr, fileName);
+        downloadBlob(text, fileName, mime);
         done();
     }
 
-    function downloadBlob(text, fileName) {
-        var blob = new Blob([text], { type: 'application/json' });
+    function downloadBlob(text, fileName, mime) {
+        var blob = new Blob([text], { type: mime || 'application/json' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
@@ -1529,6 +1888,9 @@
             closeFormModal();
             closeDetailModal();
             closeImportModal();
+            closeFillModal();
+            closeRebuyModal();
+            closeInfoModal();
         }
         // Strg/Cmd + S = sofort speichern
         if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
@@ -1649,6 +2011,7 @@
         document.getElementById('pillEur').className = 'pill-btn' + (currency === 'EUR' ? ' active' : '');
         document.getElementById('pillChf').className = 'pill-btn' + (currency === 'CHF' ? ' active' : '');
         document.getElementById('priceLabel').textContent = 'Preis (' + currency + ')';
+        document.getElementById('rebuyPriceLabel').textContent = 'Preis (' + currency + ')';
     }
 
     function parseNum(v) {
@@ -1671,12 +2034,17 @@
 
     function getFill(item) {
         var f = parseInt(item.fillLevel, 10);
-        return isNaN(f) ? 100 : f;
+        return isNaN(f) ? 100 : Math.min(100, Math.max(0, f));
+    }
+
+    /* Zusätzliche, noch verschlossene Flaschen derselben Sorte */
+    function reserveOf(item) {
+        return Array.isArray(item.reserve) ? item.reserve : [];
     }
 
     function getCount(item) {
         var c = parseInt(item.purchaseCount, 10);
-        var h = Array.isArray(item.purchaseHistory) ? item.purchaseHistory.length + 1 : 1;
+        var h = (Array.isArray(item.purchaseHistory) ? item.purchaseHistory.length : 0) + 1 + reserveOf(item).length;
         return Math.max(isNaN(c) ? 1 : c, h);
     }
 
@@ -1685,15 +2053,127 @@
         return f <= 0 ? 'empty' : (f >= 100 ? 'full' : 'open');
     }
 
+    function isLow(item) {
+        var f = getFill(item);
+        return f > 0 && f <= 25;
+    }
+
+    function fillWord(f) {
+        if (f <= 0) return 'Leer';
+        if (f >= 100) return 'Voll';
+        if (f <= 25) return 'Fast leer';
+        return 'Angebrochen';
+    }
+
     function todayISO() {
         var d = new Date();
         return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
+    function daysSince(iso) {
+        if (!iso) return null;
+        var t = Date.parse(iso + 'T12:00:00');
+        if (isNaN(t)) return null;
+        return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+    }
+
+    /* Aktuelle Flasche (Kauf) in die Historie schieben */
+    function pushHistory(item) {
+        if (!Array.isArray(item.purchaseHistory)) item.purchaseHistory = [];
+        item.purchaseHistory.push({
+            date: item.purchaseDate || '',
+            price: item.price || 0,
+            location: item.location || '',
+            source: item.source || 'Gekauft',
+            opened: item.openedDate || '',
+            emptied: item.emptiedDate || ''
+        });
+    }
+
+    /* Nächste Flasche aus dem Vorrat wird zur aktuellen */
+    function openNextFromReserve(item) {
+        var r = reserveOf(item);
+        if (!r.length) return false;
+        var next = r.shift();
+        pushHistory(item);
+        item.price = next.price || 0;
+        item.purchaseDate = next.date || '';
+        item.location = next.location || '';
+        item.source = next.source || 'Gekauft';
+        item.fillLevel = 100;
+        item.openedDate = '';
+        item.emptiedDate = '';
+        if (!r.length) delete item.reserve;
+        return true;
+    }
+
+    /* Füllstand setzen inkl. automatischer Daten (geöffnet / leer) und Vorrat.
+       Rückgabe: 'emptied', 'next' (Vorratsflasche nachgerückt) oder '' */
+    function applyFill(item, f, oldFill) {
+        f = Math.min(100, Math.max(0, parseInt(f, 10) || 0));
+        var old = oldFill === undefined ? getFill(item) : oldFill;
+        item.fillLevel = f;
+        if (f >= 100) {
+            item.openedDate = '';
+            item.emptiedDate = '';
+            return '';
+        }
+        if (!item.openedDate) item.openedDate = todayISO();
+        if (f > 0) {
+            item.emptiedDate = '';
+            return '';
+        }
+        if (old > 0 || !item.emptiedDate) item.emptiedDate = todayISO();
+        if (reserveOf(item).length) {
+            openNextFromReserve(item);
+            return 'next';
+        }
+        return 'emptied';
+    }
+
+    function fillResultToast(item, result) {
+        if (result === 'next') showToast('Leer – die nächste Flasche aus dem Vorrat steht jetzt im Schrank', 3500);
+        else if (result === 'emptied') showToast(item.wishlist ? 'Leer → Archiv und Einkaufsliste 🛒' : 'Leer → ins Archiv verschoben 📦', 3000);
+    }
+
+    /* ---------- Ansichten ---------- */
+    var currentView = 'inventory';
+    var VIEW_TEXT = {
+        inventory: { title: 'Der Schrank ist leer', text: 'Alle Flaschen sind im Archiv. Zeit für Nachschub? Schau in die Einkaufsliste.' },
+        archive: { title: 'Noch keine leeren Flaschen', text: 'Hier landen deine Flaschen, sobald du sie auf «Leer» setzt. So siehst du, was du schon alles hattest.' },
+        shopping: { title: 'Die Einkaufsliste ist leer', text: 'Markiere leere oder fast leere Flaschen mit 🛒, dann erscheinen sie hier.' }
+    };
+
+    function setView(view) {
+        currentView = view;
+        Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t) {
+            var on = t.getAttribute('data-view') === view;
+            t.classList.toggle('active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        document.getElementById('suggestBtn').classList.toggle('hidden', view !== 'inventory');
+        document.getElementById('fillFilterWrap').classList.toggle('hidden', view !== 'inventory');
+        var grid = document.getElementById('gridView');
+        if (grid) grid.scrollTop = 0;
+        renderApp();
+    }
+
+    function inView(item, view) {
+        if (view === 'archive') return fillState(item) === 'empty';
+        if (view === 'shopping') return !!item.wishlist;
+        return fillState(item) !== 'empty';
+    }
+
     function updateFilterCounts() {
-        var n = { full: 0, open: 0, empty: 0, multi: 0 };
-        whiskeys.forEach(function(w) { n[fillState(w)]++; if (getCount(w) > 1) n.multi++; });
-        var labels = { full: 'Volle Flaschen', open: 'Angebrochene Flaschen', empty: 'Leere Flaschen' };
+        var n = { full: 0, open: 0, low: 0, multi: 0 };
+        whiskeys.forEach(function(w) {
+            var st = fillState(w);
+            if (st === 'full') n.full++;
+            if (st === 'open') n.open++;
+            if (isLow(w)) n.low++;
+            if (getCount(w) > 1) n.multi++;
+        });
+        var labels = { full: 'Volle Flaschen', open: 'Angebrochene Flaschen', low: 'Fast leer (≤ 25 %)' };
         var sel = document.getElementById('fillFilter');
         for (var i = 0; i < sel.options.length; i++) {
             var o = sel.options[i];
@@ -1710,28 +2190,54 @@
         return /^\d+$/.test(String(age).trim()) ? String(age).trim() + ' J.' : String(age);
     }
 
+    function dateKey(v) {
+        return v ? String(v) : '';
+    }
+
     function getFilteredWhiskeys() {
         var q = document.getElementById('searchInput').value.toLowerCase().trim();
         var style = document.getElementById('styleFilter').value;
         var source = document.getElementById('sourceFilter').value;
         var sortBy = document.getElementById('sortFilter').value;
-        var fillF = document.getElementById('fillFilter').value;
+        var fillF = currentView === 'inventory' ? document.getElementById('fillFilter').value : '';
 
         var filtered = whiskeys.filter(function(item) {
+            if (!inView(item, currentView)) return false;
             var hay = [item.name, item.distillery, item.region, item.location, item.notes, item.age].join(' ').toLowerCase();
             var matchQuery = !q || hay.indexOf(q) !== -1;
             var matchStyle = !style || item.style === style;
             var matchSource = !source || (source === 'multi' ? getCount(item) > 1 : (item.source || 'Gekauft') === source);
-            var matchFill = !fillF || fillState(item) === fillF;
+            var matchFill = !fillF || (fillF === 'low' ? isLow(item) : fillState(item) === fillF);
             return matchQuery && matchStyle && matchSource && matchFill;
         });
 
-        if (sortBy === 'rating') {
+        var byName = function(a, b) { return (a.name || '').localeCompare(b.name || '', 'de'); };
+
+        if (sortBy === 'smart') {
+            if (currentView === 'archive') {
+                // zuletzt geleert zuerst
+                filtered.sort(function(a, b) { return dateKey(b.emptiedDate).localeCompare(dateKey(a.emptiedDate)) || byName(a, b); });
+            } else if (currentView === 'shopping') {
+                // leere zuerst, dann nach Füllstand
+                filtered.sort(function(a, b) { return getFill(a) - getFill(b) || byName(a, b); });
+            } else {
+                // angebrochene zuerst (am wenigsten drin oben), dann volle alphabetisch
+                filtered.sort(function(a, b) {
+                    var sa = fillState(a) === 'open' ? 0 : 1, sb = fillState(b) === 'open' ? 0 : 1;
+                    if (sa !== sb) return sa - sb;
+                    if (sa === 0) return getFill(a) - getFill(b) || byName(a, b);
+                    return byName(a, b);
+                });
+            }
+        } else if (sortBy === 'newest') {
+            var key = currentView === 'archive' ? 'emptiedDate' : 'purchaseDate';
+            filtered.sort(function(a, b) { return dateKey(b[key]).localeCompare(dateKey(a[key])) || (Number(b.id) || 0) - (Number(a.id) || 0); });
+        } else if (sortBy === 'rating') {
             filtered.sort(function(a, b) { return (parseNum(b.rating) || 0) - (parseNum(a.rating) || 0); });
         } else if (sortBy === 'priceDesc') {
             filtered.sort(function(a, b) { return (parseNum(b.price) || 0) - (parseNum(a.price) || 0); });
         } else if (sortBy === 'name') {
-            filtered.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'de'); });
+            filtered.sort(byName);
         } else if (sortBy === 'fillAsc') {
             filtered.sort(function(a, b) { return getFill(a) - getFill(b); });
         } else if (sortBy === 'countDesc') {
@@ -1740,29 +2246,59 @@
         return filtered;
     }
 
+    function computeSummary() {
+        var s = { bottles: 0, full: 0, open: 0, low: 0, empty: 0, wish: 0, value: 0, kinds: 0 };
+        whiskeys.forEach(function(w) {
+            var st = fillState(w);
+            var r = reserveOf(w);
+            if (st === 'empty') {
+                s.empty++;
+            } else {
+                s.kinds++;
+                s.bottles++;
+                if (st === 'full') s.full++; else s.open++;
+                if (isLow(w)) s.low++;
+                s.value += parseNum(w.price) || 0;
+            }
+            s.bottles += r.length;
+            s.full += r.length;
+            r.forEach(function(x) { s.value += parseNum(x.price) || 0; });
+            if (w.wishlist) s.wish++;
+        });
+        return s;
+    }
+
+    function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+
     function renderApp() {
         var list = getFilteredWhiskeys();
         updateFilterCounts();
 
-        document.getElementById('statCount').textContent = whiskeys.length;
-        var totalVal = whiskeys.reduce(function(sum, w) { return sum + (parseNum(w.price) || 0); }, 0);
-        document.getElementById('statValue').textContent = formatCurrency(totalVal);
-        var priced = whiskeys.filter(function(w) { return (parseNum(w.price) || 0) > 0; });
-        var avgP = priced.length ? (totalVal / priced.length) : 0;
-        document.getElementById('statAvgPrice').textContent = formatCurrency(avgP);
+        var s = computeSummary();
+        document.getElementById('statCount').textContent = plural(s.bottles, 'Flasche', 'Flaschen');
+        document.getElementById('statCountSub').textContent = s.full + ' voll · ' + s.open + ' angebrochen';
+        document.getElementById('statValue').textContent = formatCurrency(s.value);
+        document.getElementById('statValueSub').textContent = plural(s.kinds, 'Sorte', 'Sorten') + ' im Schrank';
+        document.getElementById('statArchive').textContent = s.empty;
+        document.getElementById('statArchiveSub').textContent = s.wish ? '🛒 ' + s.wish + ' auf der Einkaufsliste' : 'schon getrunken';
         var rated = whiskeys.filter(function(w) { return (parseNum(w.rating) || 0) > 0; });
         var sumR = rated.reduce(function(sum, w) { return sum + parseNum(w.rating); }, 0);
         document.getElementById('statAvgRating').textContent = (rated.length ? (sumR / rated.length).toFixed(1) : '0.0') + ' ★';
+
+        document.getElementById('cntInventory').textContent = s.bottles;
+        document.getElementById('cntArchive').textContent = s.empty;
+        document.getElementById('cntShopping').textContent = s.wish;
 
         var emptyState = document.getElementById('emptyState');
         var gridView = document.getElementById('gridView');
 
         if (list.length === 0) {
             var none = whiskeys.length === 0;
-            document.getElementById('emptyTitle').textContent = none ? 'Dein Tresor ist noch leer' : 'Keine Treffer';
-            document.getElementById('emptyText').textContent = none
-                ? 'Öffne deine JSON-Datei aus OneDrive oder füge die erste Flasche hinzu.'
-                : 'Keine Flasche passt zu Suche oder Filter.';
+            var inViewCount = whiskeys.filter(function(w) { return inView(w, currentView); }).length;
+            var txt = none ? { title: 'Dein Tresor ist noch leer', text: 'Öffne deine JSON-Datei aus OneDrive oder füge die erste Flasche hinzu.' }
+                : (inViewCount === 0 ? VIEW_TEXT[currentView] : { title: 'Keine Treffer', text: 'Keine Flasche passt zu Suche oder Filter.' });
+            document.getElementById('emptyTitle').textContent = txt.title;
+            document.getElementById('emptyText').textContent = txt.text;
             emptyState.querySelector('div[style*="flex-wrap"]').classList.toggle('hidden', !none);
             emptyState.classList.remove('hidden');
             gridView.classList.add('hidden');
@@ -1772,54 +2308,95 @@
 
         emptyState.classList.add('hidden');
         gridView.classList.remove('hidden');
+        gridView.innerHTML = list.map(cardHtml).join('');
+    }
 
-        var html = '';
-        for (var i = 0; i < list.length; i++) {
-            var item = list[i];
-            var id = escapeHtml(String(item.id));
-            var fill = getFill(item);
-            var state = fillState(item);
-            var cnt = getCount(item);
-            var stateBadge = state === 'empty' ? '<div class="badge-state empty">Leer</div>'
-                : (state === 'open' ? '<div class="badge-state open">Angebrochen</div>' : '');
-            var imgHtml = item.image
-                ? '<img src="' + escapeHtml(item.image) + '" alt="" loading="lazy" decoding="async">'
-                : '<div style="text-align:center; color:var(--text-muted);"><div style="font-size:38px;">🥃</div><div style="font-size:11px;">Kein Foto</div></div>';
-            var sub = [item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' • ');
+    function cardHtml(item) {
+        var id = escapeHtml(String(item.id));
+        var fill = getFill(item);
+        var state = fillState(item);
+        var low = isLow(item);
+        var cnt = getCount(item);
+        var res = reserveOf(item).length;
 
-            html += '<div class="card' + (state === 'empty' ? ' is-empty' : '') + '">' +
-                '<div>' +
-                    '<div class="card-img-box" onclick="openDetailModal(\'' + id + '\')">' +
-                        imgHtml +
-                        '<div class="badge-rating">★ ' + escapeHtml(item.rating || 0) + '</div>' +
-                        stateBadge +
-                    '</div>' +
-                    '<div class="fill-bar-wrap">' +
-                        '<div class="fill-labels"><span>Füllstand</span><span>' + fill + '%</span></div>' +
-                        '<div class="fill-track"><div class="fill-progress" style="width:' + fill + '%;"></div></div>' +
-                    '</div>' +
-                    '<div class="card-body" onclick="openDetailModal(\'' + id + '\')">' +
-                        '<div class="card-title">' + escapeHtml(item.name) + '</div>' +
-                        '<div class="card-sub">' + sub + '</div>' +
-                        '<div class="tags">' +
-                            '<span class="tag">' + escapeHtml(item.style || 'Single Malt') + '</span>' +
-                            (fmtAge(item.age) ? '<span class="tag">' + escapeHtml(fmtAge(item.age)) + '</span>' : '') +
-                            (item.abv ? '<span class="tag">' + escapeHtml(item.abv) + '% Vol.</span>' : '') +
-                            (item.volume ? '<span class="tag">' + escapeHtml(item.volume) + '</span>' : '') +
-                            (item.source === 'Geschenk' ? '<span class="tag">🎁 Geschenk</span>' : '') +
-                            (cnt > 1 ? '<span class="tag">🔁 ' + cnt + '× gekauft</span>' : '') +
-                        '</div>' +
-                        '<div class="meta-line"><span class="price-tag">' + formatCurrency(item.price) + '</span><span>📅 ' + escapeHtml(formatDateDE(item.purchaseDate)) + '</span></div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="card-footer">' +
-                    '<button type="button" class="btn btn-secondary" style="flex:1;" onclick="openDetailModal(\'' + id + '\')">Details</button>' +
-                    '<button type="button" class="btn btn-secondary btn-icon" aria-label="Bearbeiten" onclick="openFormModal(\'' + id + '\')">✏️</button>' +
-                    '<button type="button" class="btn btn-danger btn-icon" aria-label="Löschen" onclick="deleteWhiskey(\'' + id + '\')">🗑️</button>' +
-                '</div>' +
-            '</div>';
+        var stateBadge = state === 'empty' ? '<div class="badge-state empty">Leer</div>'
+            : (low ? '<div class="badge-state low">Fast leer</div>'
+            : (state === 'open' ? '<div class="badge-state open">Angebrochen</div>' : '<div class="badge-state">Voll</div>'));
+        var imgHtml = item.image
+            ? '<img src="' + escapeHtml(item.image) + '" alt="" loading="lazy" decoding="async">'
+            : '<div style="text-align:center; color:var(--text-muted);"><div style="font-size:38px;">🥃</div><div style="font-size:11px;">Kein Foto</div></div>';
+        var sub = [item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' • ');
+
+        var dateLine;
+        if (state === 'empty') {
+            dateLine = '📦 leer seit ' + escapeHtml(item.emptiedDate ? formatDateDE(item.emptiedDate) : '–');
+        } else if (state === 'open') {
+            var d = daysSince(item.openedDate);
+            dateLine = '🍷 ' + (d === null ? 'angebrochen' : 'offen ' + (d === 0 ? 'seit heute' : 'seit ' + plural(d, 'Tag', 'Tagen')));
+        } else {
+            dateLine = '📅 ' + escapeHtml(formatDateDE(item.purchaseDate));
         }
-        gridView.innerHTML = html;
+
+        var fillBar = state === 'empty' ? '' :
+            '<div class="fill-bar-wrap">' +
+                '<div class="fill-labels"><span>Füllstand</span><span>' + fill + '%</span></div>' +
+                '<div class="fill-track"><div class="fill-progress" style="width:' + fill + '%;"></div></div>' +
+            '</div>';
+
+        var footer;
+        if (currentView === 'inventory') {
+            footer =
+                '<button type="button" class="btn btn-primary" style="flex:1;" onclick="openFillModal(\'' + id + '\')">🥃 Füllstand</button>' +
+                '<button type="button" class="btn btn-secondary btn-icon btn-toggle' + (item.wishlist ? ' on' : '') + '" aria-label="Einkaufsliste" title="Einkaufsliste" onclick="toggleWishlist(\'' + id + '\')">🛒</button>' +
+                '<button type="button" class="btn btn-secondary btn-icon" aria-label="Bearbeiten" onclick="openFormModal(\'' + id + '\')">✏️</button>';
+        } else if (currentView === 'archive') {
+            footer =
+                '<button type="button" class="btn btn-primary" style="flex:1;" onclick="openRebuyModal(\'' + id + '\')">🔁 Nachgekauft</button>' +
+                '<button type="button" class="btn btn-secondary btn-icon btn-toggle' + (item.wishlist ? ' on' : '') + '" aria-label="Einkaufsliste" title="Auf die Einkaufsliste" onclick="toggleWishlist(\'' + id + '\')">🛒</button>' +
+                '<button type="button" class="btn btn-danger btn-icon" aria-label="Löschen" onclick="deleteWhiskey(\'' + id + '\')">🗑️</button>';
+        } else {
+            footer =
+                '<button type="button" class="btn btn-primary" style="flex:1;" onclick="openRebuyModal(\'' + id + '\')">🔁 Gekauft</button>' +
+                '<button type="button" class="btn btn-secondary" aria-label="Von der Liste nehmen" onclick="toggleWishlist(\'' + id + '\')">✕ Von Liste</button>';
+        }
+
+        return '<div class="card' + (state === 'empty' ? ' is-empty' : '') + '">' +
+            '<div>' +
+                '<div class="card-img-box" onclick="openDetailModal(\'' + id + '\')">' +
+                    imgHtml +
+                    '<div class="badge-rating">★ ' + escapeHtml(item.rating || 0) + '</div>' +
+                    stateBadge +
+                '</div>' +
+                fillBar +
+                '<div class="card-body" onclick="openDetailModal(\'' + id + '\')">' +
+                    '<div class="card-title">' + escapeHtml(item.name) + '</div>' +
+                    '<div class="card-sub">' + sub + '</div>' +
+                    '<div class="tags">' +
+                        '<span class="tag">' + escapeHtml(item.style || 'Single Malt') + '</span>' +
+                        (fmtAge(item.age) ? '<span class="tag">' + escapeHtml(fmtAge(item.age)) + '</span>' : '') +
+                        (item.abv ? '<span class="tag">' + escapeHtml(item.abv) + '% Vol.</span>' : '') +
+                        (item.volume ? '<span class="tag">' + escapeHtml(item.volume) + '</span>' : '') +
+                        (res ? '<span class="tag">📦 +' + res + ' im Vorrat</span>' : '') +
+                        (item.source === 'Geschenk' ? '<span class="tag">🎁 Geschenk</span>' : '') +
+                        (cnt > 1 ? '<span class="tag">🔁 ' + cnt + '× gekauft</span>' : '') +
+                        (item.wishlist && currentView !== 'shopping' ? '<span class="tag">🛒 Einkaufsliste</span>' : '') +
+                    '</div>' +
+                    '<div class="meta-line"><span class="price-tag">' + formatCurrency(item.price) + '</span><span>' + dateLine + '</span></div>' +
+                    (low && !item.wishlist && currentView === 'inventory' ? '<div class="card-hint">Fast leer – auf die Einkaufsliste? 🛒</div>' : '') +
+                '</div>' +
+            '</div>' +
+            '<div class="card-footer">' + footer + '</div>' +
+        '</div>';
+    }
+
+    function toggleWishlist(id) {
+        var item = findById(id);
+        if (!item) return;
+        item.wishlist = !item.wishlist;
+        renderApp();
+        markChanged();
+        showToast(item.wishlist ? '🛒 Auf die Einkaufsliste gesetzt' : 'Von der Einkaufsliste genommen');
+        if (document.getElementById('detailModal').classList.contains('open')) openDetailModal(id);
     }
 
     function escapeHtml(text) {
@@ -1890,6 +2467,9 @@
             setVal('fieldSource', item.source || 'Gekauft');
             setVal('fieldLocation', item.location);
             setVal('fieldNotes', item.notes);
+            setVal('fieldOpened', item.openedDate);
+            setVal('fieldEmptied', item.emptiedDate);
+            document.getElementById('fieldWishlist').checked = !!item.wishlist;
             currentImageBase64 = item.image || '';
         } else {
             document.getElementById('formModalTitle').textContent = 'Neue Flasche hinzufügen';
@@ -1902,6 +2482,9 @@
             document.getElementById('fillLevelVal').textContent = '100';
             setVal('fieldSource', 'Gekauft');
             setVal('fieldPurchaseCount', 1);
+            setVal('fieldOpened', '');
+            setVal('fieldEmptied', '');
+            document.getElementById('fieldWishlist').checked = false;
             var d = new Date();
             setVal('fieldPurchaseDate', d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
             currentImageBase64 = '';
@@ -1969,15 +2552,26 @@
             source: document.getElementById('fieldSource').value,
             location: getVal('fieldLocation'),
             rating: isNaN(rating) ? 0 : rating,
-            fillLevel: parseInt(document.getElementById('fieldFillLevel').value, 10),
+            wishlist: document.getElementById('fieldWishlist').checked,
             purchaseCount: Math.max(1, parseInt(getVal('fieldPurchaseCount'), 10) || 1),
             notes: document.getElementById('fieldNotes').value.replace(/\s+$/, ''),
             image: currentImageBase64
         };
 
+        var newFill = parseInt(document.getElementById('fieldFillLevel').value, 10);
+        var openedIn = getVal('fieldOpened');
+        var emptiedIn = getVal('fieldEmptied');
+        var fillResult = '';
+        var target;
+
         if (existing) {
             // unbekannte Zusatzfelder aus der JSON bleiben erhalten
+            var oldFill = getFill(existing);
             Object.assign(existing, fields);
+            existing.openedDate = openedIn;
+            existing.emptiedDate = emptiedIn;
+            fillResult = applyFill(existing, newFill, oldFill);
+            target = existing;
         } else {
             var newItem = Object.assign({ id: Date.now() }, fields);
             // Feldreihenfolge wie in der bestehenden JSON
@@ -1986,14 +2580,24 @@
                 style: newItem.style, age: newItem.age, abv: newItem.abv, volume: newItem.volume,
                 price: newItem.price, purchaseDate: newItem.purchaseDate, source: newItem.source,
                 location: newItem.location, rating: newItem.rating, fillLevel: newItem.fillLevel,
-                purchaseCount: newItem.purchaseCount, notes: newItem.notes, image: newItem.image
+                purchaseCount: newItem.purchaseCount, notes: newItem.notes, image: newItem.image,
+                wishlist: newItem.wishlist, openedDate: openedIn, emptiedDate: emptiedIn
             });
+            target = whiskeys[0];
+            fillResult = applyFill(target, newFill, 100);
         }
+        // von Hand eingetragene Daten haben Vorrang vor den automatischen
+        if (fillResult !== 'next') {
+            if (openedIn && getFill(target) < 100) target.openedDate = openedIn;
+            if (emptiedIn && getFill(target) <= 0) target.emptiedDate = emptiedIn;
+        }
+        if (!target.wishlist) delete target.wishlist;
 
         closeFormModal();
         renderApp();
         markChanged();
-        if (!(fileHandle && fileReady)) showToast(meta.fileName ? 'Übernommen – noch in OneDrive sichern' : 'Übernommen', 3000);
+        if (fillResult) fillResultToast(target, fillResult);
+        else if (!(fileHandle && fileReady)) showToast(meta.fileName ? 'Übernommen – noch in OneDrive sichern' : 'Übernommen', 3000);
     }
 
     function deleteWhiskey(id) {
@@ -2031,24 +2635,112 @@
         }
     }
 
-    /* ---------- Nachkauf ---------- */
-    function rebuyWhiskey(id) {
+    /* ---------- Füllstand-Dialog ---------- */
+    function openFillModal(id) {
         var item = findById(id);
         if (!item) return;
-        var priceIn = prompt('„' + item.name + '“ erneut gekauft.\n\nPreis dieses Kaufs (leer = bisheriger Preis):', item.price ? String(item.price) : '');
-        if (priceIn === null) return;
-        if (!Array.isArray(item.purchaseHistory)) item.purchaseHistory = [];
-        // bisherigen Kauf in die Historie schieben
-        item.purchaseHistory.push({ date: item.purchaseDate || '', price: item.price || 0, location: item.location || '' });
-        var newPrice = priceIn.trim() === '' ? item.price : numOrText(priceIn.trim());
-        item.price = newPrice;
-        item.purchaseDate = todayISO();
-        item.fillLevel = 100;
-        item.purchaseCount = getCount(item);
+        closeInfoModal();
+        setVal('fillItemId', String(item.id));
+        document.getElementById('fillModalTitle').textContent = item.name;
+        document.getElementById('quickFill').value = getFill(item);
+        document.getElementById('quickWishlist').checked = !!item.wishlist;
+        updateFillPreview();
+        setModalOpen('fillModal', true);
+    }
+
+    function closeFillModal() { setModalOpen('fillModal', false); }
+
+    function setQuickFill(v) {
+        document.getElementById('quickFill').value = v;
+        updateFillPreview();
+    }
+
+    function updateFillPreview() {
+        var f = parseInt(document.getElementById('quickFill').value, 10) || 0;
+        var item = findById(getVal('fillItemId'));
+        document.getElementById('fillLiquid').style.height = f + '%';
+        document.getElementById('fillBig').innerHTML = f + '%<small>' + fillWord(f) + '</small>';
+        var hint = '';
+        if (f <= 0) {
+            hint = item && reserveOf(item).length
+                ? 'Diese Flasche wandert in den Verlauf, die nächste aus dem Vorrat (' + reserveOf(item).length + ') steht dann im Schrank.'
+                : 'Die Flasche wandert ins Archiv. Von dort kannst du sie mit einem Klick als nachgekauft markieren.';
+        } else if (f <= 25) {
+            hint = 'Fast leer – vielleicht auf die Einkaufsliste setzen?';
+        }
+        document.getElementById('quickHint').textContent = hint;
+    }
+
+    function saveFill() {
+        var item = findById(getVal('fillItemId'));
+        if (!item) { closeFillModal(); return; }
+        item.wishlist = document.getElementById('quickWishlist').checked;
+        var result = applyFill(item, document.getElementById('quickFill').value);
+        closeFillModal();
         renderApp();
         markChanged();
-        openDetailModal(id);
-        showToast('Nachkauf erfasst – ' + item.purchaseCount + '× gekauft', 2500);
+        if (result) fillResultToast(item, result);
+        else showToast('Füllstand gespeichert: ' + getFill(item) + '%');
+    }
+
+    /* ---------- Nachkauf ---------- */
+    function rebuyWhiskey(id) { openRebuyModal(id); }
+
+    function openRebuyModal(id) {
+        var item = findById(id);
+        if (!item) return;
+        fillSuggestions();
+        closeDetailModal();
+        setVal('rebuyItemId', String(item.id));
+        document.getElementById('rebuyTitle').textContent = '🔁 ' + item.name;
+        setVal('rebuyPrice', item.price ? String(item.price) : '');
+        setVal('rebuyDate', todayISO());
+        setVal('rebuyLocation', item.location || '');
+        setVal('rebuySource', 'Gekauft');
+        document.getElementById('rebuyPriceLabel').textContent = 'Preis (' + currency + ')';
+        var st = fillState(item);
+        document.getElementById('rebuyInfo').textContent = st === 'empty'
+            ? 'Die Flasche kommt als volle Flasche zurück in den Schrank. Der bisherige Kauf bleibt im Verlauf.'
+            : 'Du hast noch eine ' + (st === 'full' ? 'volle' : 'angebrochene (' + getFill(item) + '%)') +
+              ' Flasche. Die neue kommt in den Vorrat und rückt automatisch nach, sobald die aktuelle leer ist.';
+        setModalOpen('rebuyModal', true);
+    }
+
+    function closeRebuyModal() { setModalOpen('rebuyModal', false); }
+
+    function confirmRebuy() {
+        var item = findById(getVal('rebuyItemId'));
+        if (!item) { closeRebuyModal(); return; }
+        var before = getCount(item);
+        var priceIn = getVal('rebuyPrice');
+        var buy = {
+            date: getVal('rebuyDate') || todayISO(),
+            price: priceIn === '' ? 0 : numOrText(priceIn),
+            location: getVal('rebuyLocation'),
+            source: document.getElementById('rebuySource').value
+        };
+        var wasEmpty = fillState(item) === 'empty';
+        if (wasEmpty) {
+            pushHistory(item);
+            item.price = buy.price;
+            item.purchaseDate = buy.date;
+            item.location = buy.location;
+            item.source = buy.source;
+            item.fillLevel = 100;
+            item.openedDate = '';
+            item.emptiedDate = '';
+        } else {
+            if (!Array.isArray(item.reserve)) item.reserve = [];
+            item.reserve.push(buy);
+        }
+        item.wishlist = false;
+        item.purchaseCount = before + 1;
+        closeRebuyModal();
+        renderApp();
+        markChanged();
+        showToast(wasEmpty
+            ? '🥃 Zurück im Schrank – ' + item.purchaseCount + '× gekauft'
+            : '📦 In den Vorrat gelegt (+' + reserveOf(item).length + ')', 3000);
     }
 
     /* ---------- Detailansicht ---------- */
@@ -2057,10 +2749,14 @@
         if (!item) return;
         var safeId = escapeHtml(String(item.id));
         var sub = [item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' • ');
+        var st = fillState(item);
+        var res = reserveOf(item);
 
         var imgBlock = item.image
             ? '<img src="' + escapeHtml(item.image) + '" alt="" style="width:100%; max-height:300px; object-fit:contain; background:rgba(0,0,0,.3); border-radius:14px; margin-bottom:14px;">'
             : '';
+
+        var statusTxt = st === 'empty' ? '📦 Leer (Archiv)' : (st === 'full' ? '🥃 Voll' : '🍷 ' + fillWord(getFill(item)) + ' · ' + getFill(item) + '%');
 
         var html = '<div class="modal-header">' +
                 '<h2>' + escapeHtml(item.name) + '</h2>' +
@@ -2069,18 +2765,22 @@
             imgBlock +
             (sub ? '<p style="color:var(--gold-500); font-size:13px; margin-bottom:12px;">' + sub + '</p>' : '') +
             '<div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:14px;">' +
+                '<div class="stat-card" style="padding:10px;"><div class="stat-header">Status</div><strong>' + statusTxt + '</strong></div>' +
+                '<div class="stat-card" style="padding:10px;"><div class="stat-header">Bewertung</div><strong>★ ' + escapeHtml(item.rating || 0) + '</strong></div>' +
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Stil</div><strong>' + escapeHtml(item.style || '') + '</strong></div>' +
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Alter / Jahrgang</div><strong>' + (escapeHtml(fmtAge(item.age)) || '–') + '</strong></div>' +
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Alkohol / Volumen</div><strong>' + (item.abv ? escapeHtml(item.abv) + '%' : '–') + (item.volume ? ' • ' + escapeHtml(item.volume) : '') + '</strong></div>' +
                 '<div class="stat-card" style="padding:10px;"><div class="stat-header">Preis</div><strong class="text-gold">' + formatCurrency(item.price) + '</strong></div>' +
-                '<div class="stat-card" style="padding:10px;"><div class="stat-header">Bewertung</div><strong>★ ' + escapeHtml(item.rating || 0) + '</strong></div>' +
-                '<div class="stat-card" style="padding:10px;"><div class="stat-header">Füllstand</div><strong>' + getFill(item) + '%</strong></div>' +
             '</div>' +
             '<div class="stat-card" style="padding:12px; margin-bottom:14px;">' +
                 '<div class="meta-line"><span>Quelle:</span><span>' + escapeHtml(item.source || 'Gekauft') + '</span></div>' +
                 '<div class="meta-line"><span>Kaufort / Schenker:</span><span>' + escapeHtml(item.location || 'Nicht angegeben') + '</span></div>' +
                 '<div class="meta-line"><span>' + (getCount(item) > 1 ? 'Letzter Kauf:' : 'Kaufdatum:') + '</span><span>' + escapeHtml(formatDateDE(item.purchaseDate)) + '</span></div>' +
+                (item.openedDate ? '<div class="meta-line"><span>Geöffnet am:</span><span>' + escapeHtml(formatDateDE(item.openedDate)) + '</span></div>' : '') +
+                (item.emptiedDate ? '<div class="meta-line"><span>Leer seit:</span><span>' + escapeHtml(formatDateDE(item.emptiedDate)) + '</span></div>' : '') +
                 '<div class="meta-line"><span>Anzahl gekauft:</span><span>' + getCount(item) + '×</span></div>' +
+                (item.wishlist ? '<div class="meta-line"><span>Einkaufsliste:</span><span>🛒 ja</span></div>' : '') +
+                reserveHtml(res) +
                 historyHtml(item) +
             '</div>' +
             (item.notes ? '<div class="stat-card" style="padding:12px; margin-bottom:14px;"><div class="stat-header" style="margin-bottom:4px;">Tasting Notes</div><p style="font-size:14px; white-space:pre-line;">' + escapeHtml(item.notes) + '</p></div>' : '') +
@@ -2089,9 +2789,11 @@
                 '<a href="https://www.google.com/search?q=' + encodeURIComponent((item.name || '') + ' whisky') + '" target="_blank" rel="noopener" class="btn btn-secondary">🌐 Google</a>' +
             '</div>' +
             '<div class="form-actions" style="justify-content:space-between; flex-wrap:wrap; gap:8px;">' +
+                (st !== 'empty' ? '<button type="button" class="btn btn-primary" onclick="closeDetailModal(); openFillModal(\'' + safeId + '\')">🥃 Füllstand</button>' : '') +
+                '<button type="button" class="btn ' + (st === 'empty' ? 'btn-primary' : 'btn-secondary') + '" onclick="openRebuyModal(\'' + safeId + '\')">🔁 Nachgekauft</button>' +
+                '<button type="button" class="btn btn-secondary btn-toggle' + (item.wishlist ? ' on' : '') + '" onclick="toggleWishlist(\'' + safeId + '\')">🛒 ' + (item.wishlist ? 'Von Liste' : 'Auf Liste') + '</button>' +
                 '<button type="button" class="btn btn-secondary" onclick="closeDetailModal(); openFormModal(\'' + safeId + '\')">✏️ Bearbeiten</button>' +
-                '<button type="button" class="btn btn-secondary" onclick="rebuyWhiskey(\'' + safeId + '\')">🔁 Nachgekauft</button>' +
-                '<button type="button" class="btn btn-primary" onclick="closeDetailModal()">Schliessen</button>' +
+                '<button type="button" class="btn btn-danger btn-icon" aria-label="Löschen" onclick="closeDetailModal(); deleteWhiskey(\'' + safeId + '\')">🗑️</button>' +
             '</div>';
 
         document.getElementById('detailContent').innerHTML = html;
@@ -2099,13 +2801,197 @@
         document.getElementById('detailContent').scrollTop = 0;
     }
 
+    function reserveHtml(res) {
+        if (!res.length) return '';
+        var rows = res.map(function(p) {
+            return '<li><span>📦 ' + escapeHtml(formatDateDE(p.date)) + (p.location ? ' • ' + escapeHtml(p.location) : '') + '</span><span>' + formatCurrency(p.price) + '</span></li>';
+        }).join('');
+        return '<div class="stat-header" style="margin-top:8px;">Im Vorrat (noch verschlossen)</div><ul class="history-list">' + rows + '</ul>';
+    }
+
     function historyHtml(item) {
         var h = Array.isArray(item.purchaseHistory) ? item.purchaseHistory : [];
         if (!h.length) return '';
         var rows = h.slice().reverse().map(function(p) {
-            return '<li><span>' + escapeHtml(formatDateDE(p.date)) + (p.location ? ' • ' + escapeHtml(p.location) : '') + '</span><span>' + formatCurrency(p.price) + '</span></li>';
+            return '<li><span>' + escapeHtml(formatDateDE(p.date)) + (p.location ? ' • ' + escapeHtml(p.location) : '') +
+                (p.emptied ? ' <span style="color:var(--text-muted);">(leer ' + escapeHtml(formatDateDE(p.emptied)) + ')</span>' : '') +
+                '</span><span>' + formatCurrency(p.price) + '</span></li>';
         }).join('');
-        return '<div class="stat-header" style="margin-top:8px;">Frühere Käufe</div><ul class="history-list">' + rows + '</ul>';
+        return '<div class="stat-header" style="margin-top:8px;">Frühere Flaschen</div><ul class="history-list">' + rows + '</ul>';
+    }
+
+    /* ---------- Info-Dialog (Vorschlag, Statistik) ---------- */
+    function openInfoModal(html) {
+        document.getElementById('infoContent').innerHTML = html;
+        setModalOpen('infoModal', true);
+        document.getElementById('infoContent').scrollTop = 0;
+    }
+
+    function closeInfoModal() { setModalOpen('infoModal', false); }
+
+    function modalHead(title, closeFn) {
+        return '<div class="modal-header"><h2>' + title + '</h2>' +
+            '<button type="button" class="btn btn-secondary btn-icon" aria-label="Schliessen" onclick="' + closeFn + '()">✕</button></div>';
+    }
+
+    /* ---------- Was trinke ich heute? ---------- */
+    var lastSuggestId = null;
+
+    function suggestDram() {
+        var open = whiskeys.filter(function(w) { return fillState(w) === 'open'; });
+        var pool = open.length ? open : whiskeys.filter(function(w) { return fillState(w) === 'full'; });
+        if (!pool.length) { showToast('Keine Flasche im Schrank 🥲'); return; }
+        if (pool.length > 1 && lastSuggestId !== null) {
+            pool = pool.filter(function(w) { return String(w.id) !== String(lastSuggestId); });
+        }
+        // Gewichtung: lange offen und gut bewertet = wahrscheinlicher
+        var weights = pool.map(function(w) {
+            var r = parseNum(w.rating) || 3;
+            if (fillState(w) !== 'open') return 1 + r;
+            var d = daysSince(w.openedDate);
+            return 1 + r + (d === null ? 2 : Math.min(d, 365) / 30);
+        });
+        var total = weights.reduce(function(a, b) { return a + b; }, 0);
+        var x = Math.random() * total, pick = pool[0];
+        for (var i = 0; i < pool.length; i++) {
+            x -= weights[i];
+            if (x <= 0) { pick = pool[i]; break; }
+        }
+        lastSuggestId = pick.id;
+
+        var f = getFill(pick);
+        var d = daysSince(pick.openedDate);
+        var reasons = [];
+        if (fillState(pick) === 'open') {
+            reasons.push(d === null ? 'Schon eine Weile offen' : (d === 0 ? 'Heute geöffnet' : 'Seit ' + plural(d, 'Tag', 'Tagen') + ' offen'));
+            reasons.push('noch ' + f + '% drin');
+        } else {
+            reasons.push('Keine angebrochene Flasche – Zeit, eine neue zu öffnen!');
+        }
+        if (parseNum(pick.rating)) reasons.push('★ ' + pick.rating);
+
+        var sid = escapeHtml(String(pick.id));
+        var sub = [pick.distillery, pick.region, pick.style].filter(Boolean).map(escapeHtml).join(' • ');
+        var html = modalHead('🎲 Heute im Glas', 'closeInfoModal') +
+            '<div class="suggest-box">' +
+                '<div class="bottle small"><div class="bottle-liquid" style="height:' + f + '%;"></div></div>' +
+                '<div style="min-width:0;">' +
+                    '<div class="suggest-name">' + escapeHtml(pick.name) + '</div>' +
+                    (sub ? '<div style="font-size:13px; color:var(--gold-500); margin-top:2px;">' + sub + '</div>' : '') +
+                    '<div class="suggest-reason">' + reasons.map(escapeHtml).join(' · ') + '</div>' +
+                '</div>' +
+            '</div>' +
+            (pick.notes ? '<p style="font-size:13px; color:var(--text-muted); margin-bottom:14px; white-space:pre-line;">' + escapeHtml(pick.notes.length > 220 ? pick.notes.slice(0, 220) + '…' : pick.notes) + '</p>' : '') +
+            '<p class="hint" style="margin-bottom:12px;">Angebrochene Flaschen, die schon länger offen sind, kommen öfter dran – so verlieren sie kein Aroma.</p>' +
+            '<div class="form-actions" style="flex-wrap:wrap;">' +
+                '<button type="button" class="btn btn-secondary" onclick="suggestDram()">🎲 Anderer Vorschlag</button>' +
+                '<button type="button" class="btn btn-secondary" onclick="closeInfoModal(); openDetailModal(\'' + sid + '\')">Details</button>' +
+                '<button type="button" class="btn btn-primary" onclick="openFillModal(\'' + sid + '\')">🥃 Eingeschenkt</button>' +
+            '</div>';
+        openInfoModal(html);
+    }
+
+    /* ---------- Statistik ---------- */
+    function allPurchases() {
+        var out = [];
+        whiskeys.forEach(function(w) {
+            out.push({ w: w, date: w.purchaseDate, price: w.price, source: w.source });
+            (Array.isArray(w.purchaseHistory) ? w.purchaseHistory : []).forEach(function(h) {
+                out.push({ w: w, date: h.date, price: h.price, source: h.source || 'Gekauft' });
+            });
+            reserveOf(w).forEach(function(r) {
+                out.push({ w: w, date: r.date, price: r.price, source: r.source || 'Gekauft' });
+            });
+        });
+        return out;
+    }
+
+    function topCounts(map, n) {
+        return Object.keys(map).map(function(k) { return [k, map[k]]; })
+            .sort(function(a, b) { return b[1] - a[1] || a[0].localeCompare(b[0], 'de'); })
+            .slice(0, n);
+    }
+
+    function barsHtml(rows, fmt) {
+        if (!rows.length) return '<p class="hint">Noch keine Daten.</p>';
+        var max = Math.max.apply(null, rows.map(function(r) { return r[1]; })) || 1;
+        return rows.map(function(r) {
+            return '<div class="bar-row"><span class="bar-label" title="' + escapeHtml(r[0]) + '">' + escapeHtml(r[0]) + '</span>' +
+                '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(4, Math.round(r[1] / max * 100)) + '%;"></div></div>' +
+                '<span class="bar-val">' + (fmt ? fmt(r[1]) : r[1]) + '</span></div>';
+        }).join('');
+    }
+
+    function openStatsModal() {
+        var s = computeSummary();
+        var buys = allPurchases();
+        var spent = 0, gifts = 0, byYear = {}, styles = {}, regions = {}, distilleries = {};
+        buys.forEach(function(b) {
+            if ((b.source || 'Gekauft') === 'Geschenk') { gifts++; return; }
+            var p = parseNum(b.price) || 0;
+            spent += p;
+            var y = b.date ? String(b.date).slice(0, 4) : '';
+            if (/^\d{4}$/.test(y)) byYear[y] = (byYear[y] || 0) + p;
+        });
+        var drunk = 0;
+        whiskeys.forEach(function(w) {
+            if (fillState(w) === 'empty') drunk++;
+            drunk += Array.isArray(w.purchaseHistory) ? w.purchaseHistory.length : 0;
+            var st = w.style || 'Other';
+            styles[st] = (styles[st] || 0) + 1;
+            if (w.region) regions[w.region] = (regions[w.region] || 0) + 1;
+            if (w.distillery) distilleries[w.distillery] = (distilleries[w.distillery] || 0) + 1;
+        });
+        var years = Object.keys(byYear).sort().reverse().slice(0, 6).map(function(y) { return [y, byYear[y]]; });
+        var most = whiskeys.filter(function(w) { return getCount(w) > 1; })
+            .sort(function(a, b) { return getCount(b) - getCount(a); }).slice(0, 5)
+            .map(function(w) { return [w.name, getCount(w)]; });
+        var best = whiskeys.filter(function(w) { return parseNum(w.rating) > 0; })
+            .sort(function(a, b) { return parseNum(b.rating) - parseNum(a.rating); }).slice(0, 5)
+            .map(function(w) { return [w.name, parseNum(w.rating)]; });
+
+        var kpi = function(label, val, gold) {
+            return '<div class="stat-card"><div class="stat-header">' + label + '</div><div class="stat-val' + (gold ? ' text-gold' : '') + '">' + val + '</div></div>';
+        };
+
+        var html = modalHead('📊 Statistik', 'closeInfoModal') +
+            '<div class="kpi-grid">' +
+                kpi('Sorten total', whiskeys.length) +
+                kpi('Im Schrank', s.bottles) +
+                kpi('Getrunken', drunk) +
+                kpi('Flaschen gekauft', buys.length - gifts) +
+                kpi('Geschenke', gifts) +
+                kpi('Ausgaben total', formatCurrency(spent), true) +
+            '</div>' +
+            '<div class="stats-section"><h3>Ausgaben pro Jahr</h3>' + barsHtml(years, formatCurrency) + '</div>' +
+            '<div class="stats-section"><h3>Stile</h3>' + barsHtml(topCounts(styles, 6)) + '</div>' +
+            '<div class="stats-section"><h3>Regionen</h3>' + barsHtml(topCounts(regions, 5)) + '</div>' +
+            '<div class="stats-section"><h3>Destillerien</h3>' + barsHtml(topCounts(distilleries, 5)) + '</div>' +
+            '<div class="stats-section"><h3>Am häufigsten gekauft</h3>' + barsHtml(most, function(v) { return v + '×'; }) + '</div>' +
+            '<div class="stats-section"><h3>Beste Bewertung</h3>' + barsHtml(best, function(v) { return '★ ' + v; }) + '</div>' +
+            '<div class="form-actions"><button type="button" class="btn btn-primary" onclick="closeInfoModal()">Schliessen</button></div>';
+        openInfoModal(html);
+    }
+
+    /* ---------- CSV-Export (für Excel, Semikolon) ---------- */
+    function csvCell(v) {
+        var t = v === undefined || v === null ? '' : String(v);
+        return /[";\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    }
+
+    function exportCSV() {
+        var head = ['Name', 'Destillerie', 'Region', 'Stil', 'Alter', 'Vol. %', 'Volumen', 'Status', 'Füllstand %', 'Vorrat',
+            'Preis (' + currency + ')', 'Kaufdatum', 'Quelle', 'Kaufort', 'Bewertung', 'Anzahl gekauft', 'Geöffnet am', 'Leer seit', 'Einkaufsliste', 'Notizen'];
+        var rows = whiskeys.slice().sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'de'); }).map(function(w) {
+            return [w.name, w.distillery, w.region, w.style, w.age, String(w.abv || '').replace('.', ','), w.volume,
+                fillWord(getFill(w)), getFill(w), reserveOf(w).length,
+                String(parseNum(w.price) || 0).replace('.', ','), formatDateDE(w.purchaseDate), w.source || 'Gekauft', w.location,
+                String(w.rating || '').replace('.', ','), getCount(w),
+                w.openedDate ? formatDateDE(w.openedDate) : '', w.emptiedDate ? formatDateDE(w.emptiedDate) : '',
+                w.wishlist ? 'ja' : '', w.notes];
+        });
+        var text = '﻿' + [head].concat(rows).map(function(r) { return r.map(csvCell).join(';'); }).join('\r\n');
+        shareOrDownload(text, 'whisky_tresor_' + todayISO() + '.csv', 'text/csv');
     }
 
     function closeDetailModal() {
