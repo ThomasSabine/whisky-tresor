@@ -2563,9 +2563,6 @@
         var cnt = getCount(item);
         var res = reserveOf(item).length;
 
-        var stateBadge = state === 'empty' ? '<div class="badge-state empty">Leer</div>'
-            : (low ? '<div class="badge-state low">Fast leer</div>'
-            : (state === 'open' ? '<div class="badge-state open">Angebrochen</div>' : '<div class="badge-state">Voll</div>'));
         var imgHtml = item.image
             ? '<img src="' + escapeHtml(item.image) + '" alt="" loading="lazy" decoding="async">'
             : '<div style="text-align:center; color:var(--text-muted);"><div style="font-size:38px;">🥃</div><div style="font-size:11px;">Kein Foto</div></div>';
@@ -2574,9 +2571,6 @@
         var dateLine;
         if (state === 'empty') {
             dateLine = '📦 leer seit ' + escapeHtml(item.emptiedDate ? formatDateDE(item.emptiedDate) : '–');
-        } else if (state === 'open') {
-            var d = daysSince(item.openedDate);
-            dateLine = '🍷 ' + (d === null ? 'angebrochen' : 'offen ' + (d === 0 ? 'seit heute' : 'seit ' + plural(d, 'Tag', 'Tagen')));
         } else {
             dateLine = '📅 ' + escapeHtml(formatDateDE(item.purchaseDate));
         }
@@ -2609,7 +2603,6 @@
                 '<div class="card-img-box" onclick="openDetailModal(\'' + id + '\')">' +
                     imgHtml +
                     '<div class="badge-rating">★ ' + escapeHtml(item.rating || 0) + '</div>' +
-                    stateBadge +
                 '</div>' +
                 fillBar +
                 '<div class="card-body" onclick="openDetailModal(\'' + id + '\')">' +
@@ -2623,10 +2616,8 @@
                         (res ? '<span class="tag">📦 +' + res + ' im Vorrat</span>' : '') +
                         (item.source === 'Geschenk' ? '<span class="tag">🎁 Geschenk</span>' : '') +
                         (cnt > 1 ? '<span class="tag">🔁 ' + cnt + '× gekauft</span>' : '') +
-                        (item.wishlist && currentView !== 'shopping' ? '<span class="tag">🛒 Einkaufsliste</span>' : '') +
                     '</div>' +
                     '<div class="meta-line"><span class="price-tag">' + priceHtml(item.price, itemCur(item)) + '</span><span>' + dateLine + '</span></div>' +
-                    (low && !item.wishlist && currentView === 'inventory' ? '<div class="card-hint">Fast leer – auf die Einkaufsliste? 🛒</div>' : '') +
                 '</div>' +
             '</div>' +
             '<div class="card-footer">' + footer + '</div>' +
