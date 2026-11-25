@@ -1276,6 +1276,7 @@
                 <div class="form-group">
                     <label class="form-label" for="fieldPurchaseCount">Anzahl gekauft</label>
                     <input type="number" inputmode="numeric" min="1" step="1" id="fieldPurchaseCount" class="input-control" value="1">
+                    <p class="hint hidden" id="countHint"></p>
                 </div>
             </div>
 
@@ -2311,9 +2312,14 @@
         return Array.isArray(item.reserve) ? item.reserve : [];
     }
 
+    /* Anzahl erfasster Nachkäufe (Verlauf + Vorrat) */
+    function extraPurchases(item) {
+        return (Array.isArray(item.purchaseHistory) ? item.purchaseHistory.length : 0) + reserveOf(item).length;
+    }
+
     function getCount(item) {
         var c = parseInt(item.purchaseCount, 10);
-        var h = (Array.isArray(item.purchaseHistory) ? item.purchaseHistory.length : 0) + 1 + reserveOf(item).length;
+        var h = extraPurchases(item) + 1;
         return Math.max(isNaN(c) ? 1 : c, h);
     }
 
@@ -2358,6 +2364,33 @@
             opened: item.openedDate || '',
             emptied: item.emptiedDate || ''
         });
+    }
+
+    /* Letzten Nachkauf rückgängig machen:
+       - gibt es Vorratsflaschen, wird die zuletzt erfasste entfernt
+       - sonst wird die aktuelle Flasche verworfen und die letzte Flasche aus
+         dem Verlauf wiederhergestellt (sie war leer, also zurück ins Archiv)
+       Rückgabe: 'reserve', 'history' oder '' (nichts rückgängig zu machen) */
+    function undoLastPurchase(item) {
+        var r = reserveOf(item);
+        if (r.length) {
+            r.pop();
+            if (!r.length) delete item.reserve;
+            return 'reserve';
+        }
+        var h = Array.isArray(item.purchaseHistory) ? item.purchaseHistory : [];
+        if (!h.length) return '';
+        var prev = h.pop();
+        if (!h.length) delete item.purchaseHistory;
+        item.price = prev.price || 0;
+        item.priceCurrency = entryCur(prev, item);
+        item.purchaseDate = prev.date || '';
+        item.location = prev.location || '';
+        item.source = prev.source || 'Gekauft';
+        item.openedDate = prev.opened || '';
+        item.emptiedDate = prev.emptied || '';
+        item.fillLevel = 0;
+        return 'history';
     }
 
     /* Nächste Flasche aus dem Vorrat wird zur aktuellen */
@@ -2723,6 +2756,7 @@
         fillSuggestions();
         var item = id !== undefined ? findById(id) : null;
         if (id !== undefined && !item) return;
+        var countHint = document.getElementById('countHint');
         if (item) {
             document.getElementById('formModalTitle').textContent = 'Flasche bearbeiten';
             setVal('fieldId', String(item.id));
@@ -2740,6 +2774,9 @@
             document.getElementById('fillLevelVal').textContent = getFill(item);
             setVal('fieldPurchaseDate', item.purchaseDate);
             setVal('fieldPurchaseCount', getCount(item));
+            var extra = extraPurchases(item);
+            countHint.textContent = extra ? 'Weniger eintragen = letzte' + (extra > 1 ? ' Nachkäufe' : 'n Nachkauf') + ' rückgängig machen.' : '';
+            countHint.classList.toggle('hidden', !extra);
             setVal('fieldSource', item.source || 'Gekauft');
             setVal('fieldLocation', item.location);
             setVal('fieldNotes', item.notes);
@@ -2758,6 +2795,8 @@
             document.getElementById('fillLevelVal').textContent = '100';
             setVal('fieldSource', 'Gekauft');
             setVal('fieldPurchaseCount', 1);
+            countHint.textContent = '';
+            countHint.classList.add('hidden');
             setVal('fieldPriceCurrency', defaultBuyCurrency());
             setVal('fieldOpened', '');
             setVal('fieldEmptied', '');
@@ -2837,6 +2876,32 @@
             notes: document.getElementById('fieldNotes').value.replace(/\s+$/, ''),
             image: currentImageBase64
         };
+
+        /* Anzahl unter die erfassten Käufe reduziert → Nachkäufe rückgängig machen.
+           Vorher blieb die Zahl einfach stehen, weil sie aus Verlauf + Vorrat
+           berechnet wird. */
+        if (existing) {
+            var extra = extraPurchases(existing);
+            var undoN = Math.min(extra, 1 + extra - fields.purchaseCount);
+            if (undoN > 0) {
+                var msg = 'Du hast „Anzahl gekauft“ auf ' + fields.purchaseCount + ' reduziert.\n\n' +
+                    (undoN === 1 ? 'Der letzte Nachkauf wird' : 'Die letzten ' + undoN + ' Nachkäufe werden') +
+                    ' rückgängig gemacht. Preis, Kaufdatum, Kaufort und Füllstand gehen auf den Stand davor zurück' +
+                    ' (eine zuvor leere Flasche kommt wieder ins Archiv).\n\nFortfahren?';
+                if (!confirm(msg)) return;
+                ['name', 'distillery', 'region', 'style', 'age', 'abv', 'volume', 'rating', 'notes', 'image', 'wishlist'].forEach(function(k) {
+                    existing[k] = fields[k];
+                });
+                for (var u = 0; u < undoN; u++) undoLastPurchase(existing);
+                existing.purchaseCount = fields.purchaseCount;
+                if (!existing.wishlist) delete existing.wishlist;
+                closeFormModal();
+                renderApp();
+                markChanged();
+                showToast('↩️ ' + plural(undoN, 'Nachkauf', 'Nachkäufe') + ' rückgängig gemacht', 3000);
+                return;
+            }
+        }
 
         var newFill = parseInt(document.getElementById('fieldFillLevel').value, 10);
         var openedIn = getVal('fieldOpened');
@@ -3025,6 +3090,24 @@
             : '📦 In den Vorrat gelegt (+' + reserveOf(item).length + ')', 3000);
     }
 
+    /* Aus der Detailansicht: letzten Nachkauf rückgängig machen */
+    function undoRebuy(id) {
+        var item = findById(id);
+        if (!item || !extraPurchases(item)) return;
+        var r = reserveOf(item);
+        var msg = r.length
+            ? 'Die zuletzt erfasste Vorratsflasche (gekauft ' + formatDateDE(r[r.length - 1].date) + ') wird entfernt.'
+            : 'Der letzte Nachkauf (gekauft ' + formatDateDE(item.purchaseDate) + ') wird entfernt. Die vorherige Flasche kommt als leere Flasche zurück ins Archiv.';
+        if (!confirm(msg + '\n\nFortfahren?')) return;
+        var before = getCount(item);
+        undoLastPurchase(item);
+        item.purchaseCount = Math.max(1, before - 1);
+        renderApp();
+        markChanged();
+        openDetailModal(id);
+        showToast('↩️ Nachkauf rückgängig gemacht – ' + getCount(item) + '× gekauft', 3000);
+    }
+
     /* ---------- Detailansicht ---------- */
     function openDetailModal(id) {
         var item = findById(id);
@@ -3065,6 +3148,7 @@
                 (item.wishlist ? '<div class="meta-line"><span>Einkaufsliste:</span><span>🛒 ja</span></div>' : '') +
                 reserveHtml(res, item) +
                 historyHtml(item) +
+                (extraPurchases(item) ? '<button type="button" class="btn btn-secondary" style="margin-top:10px; width:100%;" onclick="undoRebuy(\'' + safeId + '\')">↩️ Letzten Nachkauf rückgängig machen</button>' : '') +
             '</div>' +
             (item.notes ? '<div class="stat-card" style="padding:12px; margin-bottom:14px;"><div class="stat-header" style="margin-bottom:4px;">Tasting Notes</div><p style="font-size:14px; white-space:pre-line;">' + escapeHtml(item.notes) + '</p></div>' : '') +
             '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">' +
