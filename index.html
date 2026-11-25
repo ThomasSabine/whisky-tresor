@@ -1033,6 +1033,23 @@
                 scrollbar-color: var(--gold-600) transparent;
             }
         }
+        /* Karten: alle gleich aufgebaut, Preis immer auf gleicher Höhe */
+        #gridView { align-items: stretch; }
+        .card { height: 100%; }
+
+        /* Destillerie • Herkunft: immer Platz für genau zwei Zeilen */
+        .card-sub {
+            line-height: 1.4;
+            height: 2.8em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Etiketten (Stil, Alter, % Vol. …): immer genau eine Zeile */
+        .tags { height: 24px; overflow: hidden; }
+        .tag { line-height: 16px; white-space: nowrap; }
     </style>
 </head>
 <body>
